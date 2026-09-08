@@ -425,7 +425,7 @@ body {
 /* ---------- 데이터 관리 ---------- */
 .data-form {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 14px 16px;
   background: var(--surface);
   border: 1px solid var(--border);
@@ -459,6 +459,8 @@ body {
   color: var(--text);
   font-family: 'Inter', sans-serif;
   font-size: 0.9rem;
+  width: 100%;
+  min-width: 0;
 }
 
 .field-hint {
@@ -586,7 +588,7 @@ body {
 
 .import-settings {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 14px;
   margin-bottom: 18px;
 }
