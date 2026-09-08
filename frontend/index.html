@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WATCH LOG — 시청 습관 AI 비서</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="app">
+
+  <header class="app-header">
+    <h1 class="app-title">WATCH LOG</h1>
+    <p class="app-subtitle">내 시청 습관을 아는 AI 비서</p>
+  </header>
+
+  <section class="ticket" id="ticket">
+    <div class="ticket-item">
+      <span class="ticket-label">기간</span>
+      <span class="ticket-value" id="summary-period">불러오는 중...</span>
+    </div>
+    <div class="ticket-divider" aria-hidden="true"></div>
+    <div class="ticket-item">
+      <span class="ticket-label">일 평균</span>
+      <span class="ticket-value" id="summary-avg">-</span>
+    </div>
+    <div class="ticket-divider" aria-hidden="true"></div>
+    <div class="ticket-item">
+      <span class="ticket-label">숏폼 비중</span>
+      <span class="ticket-value" id="summary-shortform">-</span>
+    </div>
+    <div class="ticket-divider" aria-hidden="true"></div>
+    <div class="ticket-item">
+      <span class="ticket-label">추세</span>
+      <span class="ticket-value" id="summary-trend">-</span>
+    </div>
+  </section>
+
+  <nav class="tabs" role="tablist">
+    <button class="tab-btn active" data-tab="chat" role="tab" aria-selected="true">채팅</button>
+    <button class="tab-btn" data-tab="data" role="tab" aria-selected="false">데이터 관리</button>
+    <button class="tab-btn" data-tab="history" role="tab" aria-selected="false">대화 기록</button>
+  </nav>
+
+  <main class="tab-content">
+
+    <!-- 채팅 탭 -->
+    <section id="tab-chat" class="tab-pane active">
+      <div class="chat-window" id="chat-window">
+        <div class="chat-msg assistant">
+          <p>안녕하세요! 저는 회원님의 OTT·유튜브·쇼츠 시청 기록을 바탕으로 답하는 AI 비서예요. "요즘 얼마나 봤어?" 처럼 편하게 물어보세요.</p>
+        </div>
+      </div>
+      <div class="chat-loading" id="chat-loading" hidden>
+        <span class="spinner"></span> AI가 데이터를 확인하고 있어요...
+      </div>
+      <form class="chat-input-row" id="chat-form">
+        <input type="text" id="chat-input" placeholder="예: 이번 달 시청 시간 어때?" autocomplete="off" required>
+        <button type="submit">보내기</button>
+      </form>
+    </section>
+
+    <!-- 데이터 관리 탭 -->
+    <section id="tab-data" class="tab-pane">
+      <form class="data-form" id="data-form">
+        <div class="form-row">
+          <label for="input-date">날짜</label>
+          <input type="date" id="input-date" required>
+        </div>
+        <div class="form-row">
+          <label for="input-value">시청 시간(분)</label>
+          <input type="number" id="input-value" min="0" required>
+        </div>
+        <div class="form-row">
+          <label for="input-platform">플랫폼</label>
+          <select id="input-platform">
+            <option value="netflix">Netflix</option>
+            <option value="youtube">YouTube</option>
+            <option value="youtube_shorts">YouTube Shorts</option>
+            <option value="instagram_reels">Instagram Reels</option>
+            <option value="disney_plus">Disney+</option>
+            <option value="watcha">Watcha</option>
+            <option value="tiktok">TikTok</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <label for="input-content-type">콘텐츠 형태</label>
+          <select id="input-content-type">
+            <option value="long_form">롱폼 (OTT/일반영상)</option>
+            <option value="short_form">숏폼 (쇼츠/릴스)</option>
+          </select>
+        </div>
+        <div class="form-row form-row-wide">
+          <label for="input-memo">메모</label>
+          <input type="text" id="input-memo" placeholder="예: 넷플릭스 드라마 3화">
+        </div>
+        <button type="submit" class="btn-primary">추가</button>
+      </form>
+
+      <div class="data-list-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>날짜</th>
+              <th>시청 시간</th>
+              <th>플랫폼</th>
+              <th>형태</th>
+              <th>메모</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="data-table-body">
+            <tr><td colspan="6" class="empty-row">불러오는 중...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 대화 기록 탭 -->
+    <section id="tab-history" class="tab-pane">
+      <ul class="history-list" id="history-list">
+        <li class="empty-row">불러오는 중...</li>
+      </ul>
+    </section>
+
+  </main>
+</div>
+
+<script src="config.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
