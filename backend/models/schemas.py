@@ -72,10 +72,17 @@ class SummaryMetrics(BaseModel):
     weekday_avg: float
 
 
+class PlatformBreakdownItem(BaseModel):
+    total_minutes: int
+    count: int
+    ratio: float
+
+
 class SummaryOut(BaseModel):
     period: str
     count: int
     metrics: SummaryMetrics
+    platform_breakdown: dict[str, PlatformBreakdownItem] = Field(default_factory=dict)
     trend: str
 
 

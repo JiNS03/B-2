@@ -5,6 +5,7 @@ data 라우터(GET /api/data/summary)와 chat 라우터(컨텍스트 주입)가
 """
 from datetime import datetime
 from typing import List, Dict, Any
+from collections import defaultdict
 
 from services.firebase_service import get_firestore_client, DATA_COLLECTION
 
@@ -71,6 +72,7 @@ def build_summary() -> Dict[str, Any]:
                 "weekend_avg": 0,
                 "weekday_avg": 0,
             },
+            "platform_breakdown": {},
             "trend": "데이터가 없어 추세를 계산할 수 없습니다",
         }
 
@@ -88,12 +90,20 @@ def build_summary() -> Dict[str, Any]:
     weekend_values = []
     weekday_values = []
 
+    # 플랫폼별(유튜브 / 유튜브 뮤직 / 기타) 집계용
+    platform_minutes: Dict[str, int] = defaultdict(int)
+    platform_counts: Dict[str, int] = defaultdict(int)
+
     for r in records:
         v = r.get("value", 0)
         if r.get("content_type") == "short_form":
             short_minutes += v
         else:
             long_minutes += v
+
+        platform = r.get("platform", "unknown")
+        platform_minutes[platform] += v
+        platform_counts[platform] += 1
 
         try:
             d = datetime.strptime(r.get("date", ""), "%Y-%m-%d")
@@ -111,6 +121,15 @@ def build_summary() -> Dict[str, Any]:
     weekend_avg = round(sum(weekend_values) / len(weekend_values), 1) if weekend_values else 0
     weekday_avg = round(sum(weekday_values) / len(weekday_values), 1) if weekday_values else 0
 
+    # 플랫폼별 breakdown: {"youtube": {"total_minutes": .., "count": .., "ratio": ..}, ...}
+    platform_breakdown = {}
+    for platform, minutes in platform_minutes.items():
+        platform_breakdown[platform] = {
+            "total_minutes": minutes,
+            "count": platform_counts[platform],
+            "ratio": round(minutes / total, 2) if total else 0,
+        }
+
     return {
         "period": f"{dates[0]} ~ {dates[-1]}",
         "count": count,
@@ -124,5 +143,6 @@ def build_summary() -> Dict[str, Any]:
             "weekend_avg": weekend_avg,
             "weekday_avg": weekday_avg,
         },
+        "platform_breakdown": platform_breakdown,
         "trend": _calc_trend(values),
     }

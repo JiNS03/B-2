@@ -19,7 +19,7 @@ def _get_client() -> OpenAI:
     return _client
 
 
-SYSTEM_PROMPT_TEMPLATE = """당신은 사용자의 미디어 시청 습관(OTT, 유튜브, 쇼츠, 릴스 등)을 분석하는 AI 비서입니다.
+SYSTEM_PROMPT_TEMPLATE = """당신은 사용자의 미디어 시청 습관(OTT, 유튜브, 유튜브 뮤직, 쇼츠, 릴스 등)을 분석하는 AI 비서입니다.
 
 [사용자 시청 데이터 요약]
 - 기록 기간: {period}
@@ -29,11 +29,37 @@ SYSTEM_PROMPT_TEMPLATE = """당신은 사용자의 미디어 시청 습관(OTT, 
 - 숏폼(쇼츠/릴스) 비중: {shortform_ratio}
 - 롱폼(OTT/일반영상) 비중: {longform_ratio}
 - 주말 평균: {weekend_avg}분 / 평일 평균: {weekday_avg}분
+- 플랫폼별 비중: {platform_summary}
 - 최근 트렌드: {trend}
 
 위 데이터를 근거로, 사용자의 질문에 구체적인 숫자를 활용해 답변하세요.
+사용자가 "유튜브"와 "유튜브 뮤직"을 구분해서 물어보면 플랫폼별 비중 정보를 활용해 따로 답하세요.
 과도한 훈계나 비판은 하지 말고, 객관적인 정보 제공과 친근한 톤을 유지하세요.
 데이터에 없는 내용은 추측하지 말고 모른다고 답하세요."""
+
+
+def _format_platform_summary(platform_breakdown: Dict[str, Any]) -> str:
+    """platform_breakdown 딕셔너리를 프롬프트에 넣기 좋은 한 줄 문자열로 변환"""
+    if not platform_breakdown:
+        return "데이터 없음"
+
+    label_map = {
+        "youtube": "유튜브",
+        "youtube_music": "유튜브 뮤직",
+        "instagram_reels": "인스타 릴스",
+        "netflix": "넷플릭스",
+        "disney_plus": "디즈니+",
+        "watcha": "왓챠",
+        "tiktok": "틱톡",
+    }
+
+    parts = []
+    for platform, stats in platform_breakdown.items():
+        label = label_map.get(platform, platform)
+        ratio_pct = round(stats["ratio"] * 100)
+        parts.append(f"{label} {stats['total_minutes']}분({ratio_pct}%)")
+
+    return ", ".join(parts)
 
 
 def build_system_prompt(summary: Dict[str, Any]) -> str:
@@ -48,6 +74,7 @@ def build_system_prompt(summary: Dict[str, Any]) -> str:
         longform_ratio=metrics["longform_ratio"],
         weekend_avg=metrics["weekend_avg"],
         weekday_avg=metrics["weekday_avg"],
+        platform_summary=_format_platform_summary(summary.get("platform_breakdown", {})),
         trend=summary["trend"],
     )
 

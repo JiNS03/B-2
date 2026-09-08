@@ -83,6 +83,72 @@ body {
   background: var(--border);
 }
 
+/* ---------- 플랫폼별 요약 카드 ---------- */
+.platform-breakdown {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 28px;
+}
+
+.platform-card {
+  flex: 1;
+  min-width: 130px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--teal);
+  border-radius: 8px;
+  padding: 12px 14px;
+}
+
+.platform-card-name {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+.platform-card-minutes {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.platform-card-meta {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+/* ---------- 데이터 관리: 플랫폼 필터 ---------- */
+.platform-filter {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+.filter-btn {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  border-radius: 20px;
+  padding: 6px 14px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+}
+
+.filter-btn:hover {
+  border-color: var(--gold);
+}
+
+.filter-btn.active {
+  background: var(--gold);
+  border-color: var(--gold);
+  color: #14171C;
+  font-weight: 600;
+}
+
 /* ---------- 탭 ---------- */
 .tabs {
   display: flex;

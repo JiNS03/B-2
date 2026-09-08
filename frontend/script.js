@@ -2,6 +2,25 @@
 // 상태
 // ---------------------------------------------------------
 let currentConversationId = null;
+let allDataRecords = [];       // 현재 로드된 전체 시청 기록 (필터링용 원본)
+let activePlatformFilter = "all";
+
+// 플랫폼 코드 -> 화면에 표시할 한글 이름
+const PLATFORM_LABELS = {
+  youtube: "유튜브",
+  youtube_music: "유튜브 뮤직",
+  netflix: "넷플릭스",
+  disney_plus: "디즈니+",
+  watcha: "왓챠",
+  instagram_reels: "인스타 릴스",
+  tiktok: "틱톡",
+  youtube_shorts: "유튜브 쇼츠",
+  coupang_play: "쿠팡플레이",
+};
+
+function platformLabel(code) {
+  return PLATFORM_LABELS[code] || code;
+}
 
 // ---------------------------------------------------------
 // 초기화
@@ -49,10 +68,36 @@ async function loadSummary() {
     document.getElementById("summary-avg").textContent = `${summary.metrics.average_minutes_per_day}분`;
     document.getElementById("summary-shortform").textContent = `${Math.round(summary.metrics.shortform_ratio * 100)}%`;
     document.getElementById("summary-trend").textContent = summary.trend;
+
+    renderPlatformBreakdown(summary.platform_breakdown || {});
   } catch (err) {
     console.error(err);
     document.getElementById("summary-period").textContent = "불러오기 실패";
   }
+}
+
+function renderPlatformBreakdown(breakdown) {
+  const container = document.getElementById("platform-breakdown");
+  const entries = Object.entries(breakdown);
+
+  if (entries.length === 0) {
+    container.innerHTML = "";
+    return;
+  }
+
+  // 시청 시간이 많은 순으로 정렬
+  entries.sort((a, b) => b[1].total_minutes - a[1].total_minutes);
+
+  container.innerHTML = entries
+    .map(
+      ([platform, stats]) => `
+    <div class="platform-card">
+      <div class="platform-card-name">${platformLabel(platform)}</div>
+      <div class="platform-card-minutes">${stats.total_minutes}분</div>
+      <div class="platform-card-meta">${stats.count}건 · 전체의 ${Math.round(stats.ratio * 100)}%</div>
+    </div>`
+    )
+    .join("");
 }
 
 // ---------------------------------------------------------
@@ -154,35 +199,71 @@ async function loadDataList() {
     if (!res.ok) throw new Error("data list fetch failed");
     const records = await res.json();
 
-    if (records.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="6" class="empty-row">아직 기록이 없어요. 위 폼으로 추가해보세요.</td></tr>`;
-      return;
-    }
-
-    // 최근 날짜가 위로 오도록 정렬해서 표시
-    const sorted = [...records].sort((a, b) => (a.date < b.date ? 1 : -1));
-
-    tbody.innerHTML = sorted
-      .map(
-        (r) => `
-      <tr>
-        <td>${r.date}</td>
-        <td>${r.value}분</td>
-        <td>${r.platform}</td>
-        <td>${r.content_type === "short_form" ? "숏폼" : "롱폼"}</td>
-        <td>${escapeHtml(r.memo || "")}</td>
-        <td><button class="btn-delete" data-id="${r.id}">삭제</button></td>
-      </tr>`
-      )
-      .join("");
-
-    tbody.querySelectorAll(".btn-delete").forEach((btn) => {
-      btn.addEventListener("click", () => deleteRecord(btn.dataset.id));
-    });
+    allDataRecords = records;
+    renderPlatformFilterButtons(records);
+    renderDataTable();
   } catch (err) {
     console.error(err);
     tbody.innerHTML = `<tr><td colspan="6" class="empty-row">목록을 불러오지 못했어요.</td></tr>`;
   }
+}
+
+function renderPlatformFilterButtons(records) {
+  const container = document.getElementById("platform-filter");
+  const platforms = [...new Set(records.map((r) => r.platform))].sort();
+
+  const buttonsHtml = platforms
+    .map(
+      (p) =>
+        `<button class="filter-btn${p === activePlatformFilter ? " active" : ""}" data-platform="${p}">${platformLabel(p)}</button>`
+    )
+    .join("");
+
+  container.innerHTML = `<button class="filter-btn${activePlatformFilter === "all" ? " active" : ""}" data-platform="all">전체</button>${buttonsHtml}`;
+
+  container.querySelectorAll(".filter-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      activePlatformFilter = btn.dataset.platform;
+      container.querySelectorAll(".filter-btn").forEach((b) => b.classList.remove("active"));
+      btn.classList.add("active");
+      renderDataTable();
+    });
+  });
+}
+
+function renderDataTable() {
+  const tbody = document.getElementById("data-table-body");
+
+  const filtered =
+    activePlatformFilter === "all"
+      ? allDataRecords
+      : allDataRecords.filter((r) => r.platform === activePlatformFilter);
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="6" class="empty-row">해당 항목의 기록이 없어요.</td></tr>`;
+    return;
+  }
+
+  // 최근 날짜가 위로 오도록 정렬해서 표시
+  const sorted = [...filtered].sort((a, b) => (a.date < b.date ? 1 : -1));
+
+  tbody.innerHTML = sorted
+    .map(
+      (r) => `
+    <tr>
+      <td>${r.date}</td>
+      <td>${r.value}분</td>
+      <td>${platformLabel(r.platform)}</td>
+      <td>${r.content_type === "short_form" ? "숏폼" : "롱폼"}</td>
+      <td>${escapeHtml(r.memo || "")}</td>
+      <td><button class="btn-delete" data-id="${r.id}">삭제</button></td>
+    </tr>`
+    )
+    .join("");
+
+  tbody.querySelectorAll(".btn-delete").forEach((btn) => {
+    btn.addEventListener("click", () => deleteRecord(btn.dataset.id));
+  });
 }
 
 async function deleteRecord(id) {
