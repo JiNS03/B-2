@@ -1,6 +1,9 @@
 """
-OpenAI Chat Completions 호출
+OpenAI 호환 Chat Completions 호출
 - 데이터 요약을 시스템 프롬프트에 주입하는 컨텍스트 주입 로직의 핵심
+- OpenAI 공식 API 또는 Codyssey 공개 API(OpenAI 호환 규격) 둘 다 지원한다.
+  Codyssey 키를 쓰는 경우 OPENAI_BASE_URL 환경변수에 콘솔의 "문서" 탭에
+  적힌 Base URL을 넣어야 한다. (안 넣으면 기본값인 OpenAI 공식 서버로 요청감)
 """
 import os
 from openai import OpenAI
@@ -15,7 +18,12 @@ def _get_client() -> OpenAI:
         api_key = os.environ.get("OPENAI_API_KEY")
         if not api_key:
             raise RuntimeError("OPENAI_API_KEY 환경변수가 설정되지 않았습니다.")
-        _client = OpenAI(api_key=api_key)
+
+        base_url = os.environ.get("OPENAI_BASE_URL")  # Codyssey 등 호환 API를 쓸 때만 설정
+        if base_url:
+            _client = OpenAI(api_key=api_key, base_url=base_url)
+        else:
+            _client = OpenAI(api_key=api_key)
     return _client
 
 
@@ -93,7 +101,7 @@ def ask_gpt(user_message: str, summary: Dict[str, Any], history: List[Dict[str, 
     messages.append({"role": "user", "content": user_message})
 
     response = client.chat.completions.create(
-        model="gpt-4o-mini",
+        model=os.environ.get("OPENAI_MODEL", "gpt-4o-mini"),
         messages=messages,
         max_tokens=500,
         temperature=0.7,
