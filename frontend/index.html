@@ -46,8 +46,7 @@
   </section>
 
   <nav class="tabs" role="tablist">
-    <button class="tab-btn active" data-tab="chat" role="tab" aria-selected="true">채팅</button>
-    <button class="tab-btn" data-tab="insights" role="tab" aria-selected="false">인사이트</button>
+    <button class="tab-btn active" data-tab="insights" role="tab" aria-selected="true">인사이트</button>
     <button class="tab-btn" data-tab="data" role="tab" aria-selected="false">데이터 관리</button>
     <button class="tab-btn" data-tab="import" role="tab" aria-selected="false">가져오기</button>
     <button class="tab-btn" data-tab="history" role="tab" aria-selected="false">대화 기록</button>
@@ -55,24 +54,23 @@
 
   <main class="tab-content">
 
-    <!-- 채팅 탭 -->
-    <section id="tab-chat" class="tab-pane active">
-      <div class="chat-window" id="chat-window">
-        <div class="chat-msg assistant">
-          <p>안녕하세요! 저는 회원님의 OTT·유튜브·쇼츠 시청 기록을 바탕으로 답하는 AI 비서예요. "요즘 얼마나 봤어?" 처럼 편하게 물어보세요.</p>
+    <!-- 인사이트 탭 -->
+    <section id="tab-insights" class="tab-pane active">
+
+      <div class="insight-block">
+        <div class="range-control">
+          <div class="range-control-label">
+            <span id="range-label-start">-</span>
+            <span class="range-control-sep">~</span>
+            <span id="range-label-end">-</span>
+          </div>
+          <div class="range-slider" id="range-slider">
+            <input type="range" id="range-start" min="0" max="0" value="0" step="1">
+            <input type="range" id="range-end" min="0" max="0" value="0" step="1">
+          </div>
         </div>
       </div>
-      <div class="chat-loading" id="chat-loading" hidden>
-        <span class="spinner"></span> AI가 데이터를 확인하고 있어요...
-      </div>
-      <form class="chat-input-row" id="chat-form">
-        <input type="text" id="chat-input" placeholder="예: 이번 달 시청 시간 어때?" autocomplete="off" required>
-        <button type="submit">보내기</button>
-      </form>
-    </section>
 
-    <!-- 인사이트 탭 -->
-    <section id="tab-insights" class="tab-pane">
       <div class="insight-block">
         <div class="insight-block-header">
           <h2 class="insight-title">일별 시청 캘린더</h2>
@@ -102,12 +100,14 @@
       <div class="insight-split">
         <div class="insight-block">
           <h2 class="insight-title">플랫폼별 비중</h2>
+          <p class="insight-caption insight-caption-top">전체 기간 기준</p>
           <div class="chart-card chart-card-small">
             <canvas id="platform-chart"></canvas>
           </div>
         </div>
         <div class="insight-block">
           <h2 class="insight-title">롱폼 vs 숏폼</h2>
+          <p class="insight-caption insight-caption-top">전체 기간 기준</p>
           <div class="chart-card chart-card-small">
             <canvas id="formtype-chart"></canvas>
           </div>
@@ -240,6 +240,30 @@
     </section>
 
   </main>
+</div>
+
+<!-- 플로팅 AI 챗봇 버튼 + 팝업 패널 -->
+<button class="chat-fab" id="chat-fab" type="button" aria-label="AI 비서와 채팅하기">
+  <span class="chat-fab-icon">💬</span>
+</button>
+
+<div class="chat-panel" id="chat-panel" hidden>
+  <div class="chat-panel-header">
+    <span class="chat-panel-title">AI 비서</span>
+    <button class="chat-panel-close" id="chat-panel-close" type="button" aria-label="닫기">✕</button>
+  </div>
+  <div class="chat-window" id="chat-window">
+    <div class="chat-msg assistant">
+      <p>안녕하세요! 저는 회원님의 OTT·유튜브·쇼츠 시청 기록을 바탕으로 답하는 AI 비서예요. "요즘 얼마나 봤어?" 처럼 편하게 물어보세요.</p>
+    </div>
+  </div>
+  <div class="chat-loading" id="chat-loading" hidden>
+    <span class="spinner"></span> AI가 데이터를 확인하고 있어요...
+  </div>
+  <form class="chat-input-row" id="chat-form">
+    <input type="text" id="chat-input" placeholder="예: 이번 달 시청 시간 어때?" autocomplete="off" required>
+    <button type="submit">보내기</button>
+  </form>
 </div>
 
 <script src="config.js"></script>

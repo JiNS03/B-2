@@ -8,6 +8,10 @@ let trendChart = null;
 let platformChart = null;
 let formtypeChart = null;
 
+let allDates = [];             // 인사이트 기간 슬라이더용: 정렬된 날짜 목록 (중복 제거)
+let rangeStartIdx = 0;
+let rangeEndIdx = 0;
+
 // 플랫폼 코드 -> 화면에 표시할 한글 이름
 const PLATFORM_LABELS = {
   youtube: "유튜브",
@@ -22,13 +26,12 @@ const PLATFORM_LABELS = {
 };
 
 // 플랫폼별로 의미 있는 콘텐츠 형태만 남기기 위한 매핑.
-// 값이 하나뿐이면 그 값으로 자동 고정하고 선택 UI는 숨긴다.
 const PLATFORM_CONTENT_TYPES = {
   youtube: ["long_form", "short_form"],
   youtube_shorts: ["short_form"],
   instagram_reels: ["short_form"],
   tiktok: ["short_form"],
-  youtube_music: ["long_form"], // "재생"만 있으므로 롱폼으로 고정 취급
+  youtube_music: ["long_form"],
   netflix: ["long_form"],
   disney_plus: ["long_form"],
   watcha: ["long_form"],
@@ -40,7 +43,6 @@ const CONTENT_TYPE_LABELS = {
   short_form: "숏폼 (쇼츠/릴스)",
 };
 
-// 차트에 쓸 고정 색상 팔레트
 const CHART_COLORS = ["#E8B34C", "#3E8E8A", "#C1584A", "#7D8CE0", "#9098A3", "#5AB584"];
 
 function platformLabel(code) {
@@ -55,6 +57,8 @@ document.addEventListener("DOMContentLoaded", () => {
   setupTabs();
   setupContentTypeSync();
   setupImportForm();
+  setupChatWidget();
+  setupRangeSlider();
 
   loadSummary();
   loadDataList();
@@ -79,9 +83,8 @@ function setupTheme() {
     document.documentElement.setAttribute("data-theme", next);
     localStorage.setItem("watchlog-theme", next);
 
-    // Chart.js는 색상을 그릴 때 고정값을 쓰므로, 테마가 바뀌면 다시 그려줘야 축/범례 글자색이 맞음
     loadSummary();
-    if (allDataRecords.length) renderInsightsFromRecords(allDataRecords);
+    applyRangeFilterAndRender();
   });
 }
 
@@ -106,6 +109,30 @@ function setupTabs() {
 }
 
 // ---------------------------------------------------------
+// 플로팅 AI 챗봇 버튼 / 패널
+// ---------------------------------------------------------
+function setupChatWidget() {
+  const fab = document.getElementById("chat-fab");
+  const panel = document.getElementById("chat-panel");
+  const closeBtn = document.getElementById("chat-panel-close");
+
+  fab.addEventListener("click", () => {
+    panel.hidden = !panel.hidden;
+    if (!panel.hidden) {
+      document.getElementById("chat-input").focus();
+    }
+  });
+
+  closeBtn.addEventListener("click", () => {
+    panel.hidden = true;
+  });
+}
+
+function openChatPanel() {
+  document.getElementById("chat-panel").hidden = false;
+}
+
+// ---------------------------------------------------------
 // 데이터 관리 폼: 플랫폼에 따라 콘텐츠 형태 옵션을 다시 그림
 // ---------------------------------------------------------
 function setupContentTypeSync() {
@@ -118,23 +145,22 @@ function setupContentTypeSync() {
     const allowed = PLATFORM_CONTENT_TYPES[platform] || ["long_form", "short_form"];
 
     if (allowed.length === 1) {
-      // 선택지가 하나뿐이면 그 값으로 고정하고 필드 자체를 숨김
       contentTypeSelect.innerHTML = `<option value="${allowed[0]}">${CONTENT_TYPE_LABELS[allowed[0]]}</option>`;
-      contentTypeRow.style.display = "none";
+      contentTypeRow.hidden = true;
     } else {
       contentTypeSelect.innerHTML = allowed
         .map((v) => `<option value="${v}">${CONTENT_TYPE_LABELS[v]}</option>`)
         .join("");
-      contentTypeRow.style.display = "";
+      contentTypeRow.hidden = false;
     }
   }
 
   platformSelect.addEventListener("change", sync);
-  sync(); // 초기 상태 반영
+  sync();
 }
 
 // ---------------------------------------------------------
-// 요약 정보 (상단 히어로 통계 + 인사이트 차트)
+// 요약 정보 (상단 히어로 통계 + 플랫폼/형태 비중 차트 — 항상 전체 기간 기준)
 // ---------------------------------------------------------
 async function loadSummary() {
   try {
@@ -212,31 +238,100 @@ function renderFormtypeChart(metrics) {
 }
 
 // ---------------------------------------------------------
-// 인사이트: 캘린더 히트맵 + 추이 라인차트
+// 인사이트: 기간 슬라이더 + 캘린더 히트맵 + 추이 라인차트
 // ---------------------------------------------------------
-function renderInsightsFromRecords(records) {
+function setupRangeSlider() {
+  const startInput = document.getElementById("range-start");
+  const endInput = document.getElementById("range-end");
+
+  startInput.addEventListener("input", () => {
+    if (Number(startInput.value) > Number(endInput.value)) {
+      startInput.value = endInput.value;
+    }
+    rangeStartIdx = Number(startInput.value);
+    applyRangeFilterAndRender();
+  });
+
+  endInput.addEventListener("input", () => {
+    if (Number(endInput.value) < Number(startInput.value)) {
+      endInput.value = startInput.value;
+    }
+    rangeEndIdx = Number(endInput.value);
+    applyRangeFilterAndRender();
+  });
+}
+
+function initRangeSliderBounds() {
+  const startInput = document.getElementById("range-start");
+  const endInput = document.getElementById("range-end");
+
+  const maxIdx = Math.max(0, allDates.length - 1);
+  startInput.min = 0;
+  startInput.max = maxIdx;
+  endInput.min = 0;
+  endInput.max = maxIdx;
+
+  // 처음 로드되었을 때는 전체 기간을 기본 선택 상태로 둔다
+  rangeStartIdx = 0;
+  rangeEndIdx = maxIdx;
+  startInput.value = rangeStartIdx;
+  endInput.value = rangeEndIdx;
+
+  updateRangeLabels();
+}
+
+function updateRangeLabels() {
+  const startLabel = document.getElementById("range-label-start");
+  const endLabel = document.getElementById("range-label-end");
+  if (allDates.length === 0) {
+    startLabel.textContent = "-";
+    endLabel.textContent = "-";
+    return;
+  }
+  startLabel.textContent = allDates[rangeStartIdx];
+  endLabel.textContent = allDates[rangeEndIdx];
+}
+
+function applyRangeFilterAndRender() {
+  updateRangeLabels();
+  if (allDates.length === 0) {
+    renderHeatmap({});
+    renderTrendChart({});
+    return;
+  }
+
+  const startDate = allDates[rangeStartIdx];
+  const endDate = allDates[rangeEndIdx];
+
+  const filtered = allDataRecords.filter((r) => r.date >= startDate && r.date <= endDate);
   const dailyTotals = {};
-  records.forEach((r) => {
+  filtered.forEach((r) => {
     dailyTotals[r.date] = (dailyTotals[r.date] || 0) + r.value;
   });
 
-  renderHeatmap(dailyTotals);
+  renderHeatmap(dailyTotals, startDate, endDate);
   renderTrendChart(dailyTotals);
 }
 
-function renderHeatmap(dailyTotals) {
+function renderInsightsFromRecords(records) {
+  allDates = [...new Set(records.map((r) => r.date))].sort();
+  initRangeSliderBounds();
+  applyRangeFilterAndRender();
+}
+
+function renderHeatmap(dailyTotals, rangeStart, rangeEnd) {
   const grid = document.getElementById("heatmap-grid");
   const caption = document.getElementById("heatmap-caption");
   const dates = Object.keys(dailyTotals).sort();
 
   if (dates.length === 0) {
     grid.innerHTML = "";
-    caption.textContent = "아직 데이터가 없어요.";
+    caption.textContent = "선택한 기간에 데이터가 없어요.";
     return;
   }
 
-  const startDate = new Date(dates[0]);
-  const endDate = new Date(dates[dates.length - 1]);
+  const startDate = new Date(rangeStart || dates[0]);
+  const endDate = new Date(rangeEnd || dates[dates.length - 1]);
 
   const gridStart = new Date(startDate);
   gridStart.setDate(gridStart.getDate() - gridStart.getDay());
@@ -254,7 +349,7 @@ function renderHeatmap(dailyTotals) {
   }
 
   grid.innerHTML = cells.join("");
-  caption.textContent = `${dates[0]} ~ ${dates[dates.length - 1]} · 칸에 마우스를 올리면 날짜별 시청 시간이 보여요.`;
+  caption.textContent = `선택 기간: ${dates[0]} ~ ${dates[dates.length - 1]} · 칸에 마우스를 올리면 날짜별 시청 시간이 보여요.`;
 }
 
 function renderTrendChart(dailyTotals) {
@@ -536,7 +631,6 @@ async function handleImportSubmit(e) {
   loading.hidden = false;
   resultBox.hidden = true;
 
-  // 큰 파일일수록 대략적인 안내 문구를 바꿔줌 (실제 진행률은 아니고 심리적 안내용)
   const sizeMB = selectedImportFile.size / 1024 / 1024;
   loadingText.textContent =
     sizeMB > 10
@@ -564,7 +658,6 @@ async function handleImportSubmit(e) {
     `;
     resultBox.hidden = false;
 
-    // 새로 만든 배치가 활성화된 상태이므로 화면 전체를 새로고침
     loadSummary();
     loadDataList();
     loadBatchList();
@@ -706,7 +799,8 @@ async function loadConversation(id) {
     resetChatWindow();
     conv.messages.forEach((m) => appendChatMessage(m.role, m.content));
 
-    document.querySelector('.tab-btn[data-tab="chat"]').click();
+    // 대화 기록 탭에서 불러오기를 누르면 플로팅 채팅 패널을 열어서 보여줌
+    openChatPanel();
   } catch (err) {
     console.error(err);
     alert("대화를 불러오지 못했어요.");
