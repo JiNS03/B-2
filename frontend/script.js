@@ -2,8 +2,11 @@
 // 상태
 // ---------------------------------------------------------
 let currentConversationId = null;
-let allDataRecords = [];       // 현재 로드된 전체 시청 기록 (필터링용 원본)
+let allDataRecords = [];       // 현재 로드된 전체 시청 기록 (필터링/시각화용 원본)
 let activePlatformFilter = "all";
+let trendChart = null;
+let platformChart = null;
+let formtypeChart = null;
 
 // 플랫폼 코드 -> 화면에 표시할 한글 이름
 const PLATFORM_LABELS = {
@@ -17,6 +20,9 @@ const PLATFORM_LABELS = {
   youtube_shorts: "유튜브 쇼츠",
   coupang_play: "쿠팡플레이",
 };
+
+// 차트에 쓸 고정 색상 팔레트 (디자인 톤에 맞춤: 골드 / 틸 / 보조색들)
+const CHART_COLORS = ["#E8B34C", "#3E8E8A", "#C1584A", "#7D8CE0", "#9098A3", "#5AB584"];
 
 function platformLabel(code) {
   return PLATFORM_LABELS[code] || code;
@@ -56,7 +62,7 @@ function setupTabs() {
 }
 
 // ---------------------------------------------------------
-// 요약 정보 (상단 티켓)
+// 요약 정보 (상단 히어로 통계 + 인사이트 차트)
 // ---------------------------------------------------------
 async function loadSummary() {
   try {
@@ -64,40 +70,149 @@ async function loadSummary() {
     if (!res.ok) throw new Error("summary fetch failed");
     const summary = await res.json();
 
-    document.getElementById("summary-period").textContent = summary.period;
-    document.getElementById("summary-avg").textContent = `${summary.metrics.average_minutes_per_day}분`;
-    document.getElementById("summary-shortform").textContent = `${Math.round(summary.metrics.shortform_ratio * 100)}%`;
-    document.getElementById("summary-trend").textContent = summary.trend;
+    document.getElementById("stat-total").textContent = summary.metrics.total_minutes;
+    document.getElementById("stat-avg").textContent = summary.metrics.average_minutes_per_day;
+    document.getElementById("stat-period").textContent = summary.period;
+    document.getElementById("stat-trend").textContent = summary.trend;
 
-    renderPlatformBreakdown(summary.platform_breakdown || {});
+    renderPlatformChart(summary.platform_breakdown || {});
+    renderFormtypeChart(summary.metrics);
   } catch (err) {
     console.error(err);
-    document.getElementById("summary-period").textContent = "불러오기 실패";
+    document.getElementById("stat-period").textContent = "불러오기 실패";
   }
 }
 
-function renderPlatformBreakdown(breakdown) {
-  const container = document.getElementById("platform-breakdown");
+function renderPlatformChart(breakdown) {
+  const canvas = document.getElementById("platform-chart");
   const entries = Object.entries(breakdown);
 
-  if (entries.length === 0) {
-    container.innerHTML = "";
+  if (platformChart) platformChart.destroy();
+  if (entries.length === 0) return;
+
+  const labels = entries.map(([platform]) => platformLabel(platform));
+  const data = entries.map(([, stats]) => stats.total_minutes);
+
+  platformChart = new Chart(canvas, {
+    type: "doughnut",
+    data: {
+      labels,
+      datasets: [{ data, backgroundColor: CHART_COLORS, borderWidth: 0 }],
+    },
+    options: {
+      plugins: {
+        legend: { position: "bottom", labels: { color: "#9098A3", font: { family: "Inter" }, boxWidth: 12, padding: 12 } },
+      },
+    },
+  });
+}
+
+function renderFormtypeChart(metrics) {
+  const canvas = document.getElementById("formtype-chart");
+  if (formtypeChart) formtypeChart.destroy();
+
+  formtypeChart = new Chart(canvas, {
+    type: "doughnut",
+    data: {
+      labels: ["롱폼", "숏폼"],
+      datasets: [
+        {
+          data: [metrics.longform_ratio, metrics.shortform_ratio],
+          backgroundColor: [CHART_COLORS[1], CHART_COLORS[0]],
+          borderWidth: 0,
+        },
+      ],
+    },
+    options: {
+      plugins: {
+        legend: { position: "bottom", labels: { color: "#9098A3", font: { family: "Inter" }, boxWidth: 12, padding: 12 } },
+      },
+    },
+  });
+}
+
+// ---------------------------------------------------------
+// 인사이트: 캘린더 히트맵 + 추이 라인차트
+// (allDataRecords가 로드된 뒤 호출됨 — loadDataList 참고)
+// ---------------------------------------------------------
+function renderInsightsFromRecords(records) {
+  // 날짜별 총 시청 시간(분) 집계
+  const dailyTotals = {};
+  records.forEach((r) => {
+    dailyTotals[r.date] = (dailyTotals[r.date] || 0) + r.value;
+  });
+
+  renderHeatmap(dailyTotals);
+  renderTrendChart(dailyTotals);
+}
+
+function renderHeatmap(dailyTotals) {
+  const grid = document.getElementById("heatmap-grid");
+  const caption = document.getElementById("heatmap-caption");
+  const dates = Object.keys(dailyTotals).sort();
+
+  if (dates.length === 0) {
+    grid.innerHTML = "";
+    caption.textContent = "아직 데이터가 없어요.";
     return;
   }
 
-  // 시청 시간이 많은 순으로 정렬
-  entries.sort((a, b) => b[1].total_minutes - a[1].total_minutes);
+  const startDate = new Date(dates[0]);
+  const endDate = new Date(dates[dates.length - 1]);
 
-  container.innerHTML = entries
-    .map(
-      ([platform, stats]) => `
-    <div class="platform-card">
-      <div class="platform-card-name">${platformLabel(platform)}</div>
-      <div class="platform-card-minutes">${stats.total_minutes}분</div>
-      <div class="platform-card-meta">${stats.count}건 · 전체의 ${Math.round(stats.ratio * 100)}%</div>
-    </div>`
-    )
-    .join("");
+  // 시작을 그 주의 일요일로 맞춰서 7행(요일) 그리드가 깔끔하게 나오도록 함
+  const gridStart = new Date(startDate);
+  gridStart.setDate(gridStart.getDate() - gridStart.getDay());
+
+  const maxValue = Math.max(...Object.values(dailyTotals), 1);
+
+  const cells = [];
+  const cursor = new Date(gridStart);
+  while (cursor <= endDate) {
+    const iso = cursor.toISOString().slice(0, 10);
+    const value = dailyTotals[iso] || 0;
+    const level = value === 0 ? 0 : Math.min(4, Math.ceil((value / maxValue) * 4));
+    cells.push(`<div class="heatmap-cell level-${level}" title="${iso} · ${value}분"></div>`);
+    cursor.setDate(cursor.getDate() + 1);
+  }
+
+  grid.innerHTML = cells.join("");
+  caption.textContent = `${dates[0]} ~ ${dates[dates.length - 1]} · 칸에 마우스를 올리면 날짜별 시청 시간이 보여요.`;
+}
+
+function renderTrendChart(dailyTotals) {
+  const canvas = document.getElementById("trend-chart");
+  const dates = Object.keys(dailyTotals).sort();
+
+  if (trendChart) trendChart.destroy();
+  if (dates.length === 0) return;
+
+  const values = dates.map((d) => dailyTotals[d]);
+
+  trendChart = new Chart(canvas, {
+    type: "line",
+    data: {
+      labels: dates,
+      datasets: [
+        {
+          label: "일별 시청 시간(분)",
+          data: values,
+          borderColor: "#E8B34C",
+          backgroundColor: "rgba(232, 179, 76, 0.15)",
+          fill: true,
+          tension: 0.25,
+          pointRadius: 0,
+        },
+      ],
+    },
+    options: {
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { ticks: { color: "#9098A3", maxTicksLimit: 8 }, grid: { color: "#2E333D" } },
+        y: { ticks: { color: "#9098A3" }, grid: { color: "#2E333D" } },
+      },
+    },
+  });
 }
 
 // ---------------------------------------------------------
@@ -202,6 +317,7 @@ async function loadDataList() {
     allDataRecords = records;
     renderPlatformFilterButtons(records);
     renderDataTable();
+    renderInsightsFromRecords(records);
   } catch (err) {
     console.error(err);
     tbody.innerHTML = `<tr><td colspan="6" class="empty-row">목록을 불러오지 못했어요.</td></tr>`;

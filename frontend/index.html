@@ -5,8 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>WATCH LOG — 시청 습관 AI 비서</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 </head>
 <body>
 
@@ -17,34 +18,30 @@
     <p class="app-subtitle">내 시청 습관을 아는 AI 비서</p>
   </header>
 
-  <section class="ticket" id="ticket">
-    <div class="ticket-item">
-      <span class="ticket-label">기간</span>
-      <span class="ticket-value" id="summary-period">불러오는 중...</span>
+  <section class="hero-stats" id="hero-stats">
+    <div class="hero-stat hero-stat-primary">
+      <span class="hero-stat-label">전체 시청 시간</span>
+      <span class="hero-stat-value" id="stat-total">-</span>
+      <span class="hero-stat-unit">분</span>
     </div>
-    <div class="ticket-divider" aria-hidden="true"></div>
-    <div class="ticket-item">
-      <span class="ticket-label">일 평균</span>
-      <span class="ticket-value" id="summary-avg">-</span>
+    <div class="hero-stat">
+      <span class="hero-stat-label">일 평균</span>
+      <span class="hero-stat-value" id="stat-avg">-</span>
+      <span class="hero-stat-unit">분/일</span>
     </div>
-    <div class="ticket-divider" aria-hidden="true"></div>
-    <div class="ticket-item">
-      <span class="ticket-label">숏폼 비중</span>
-      <span class="ticket-value" id="summary-shortform">-</span>
+    <div class="hero-stat">
+      <span class="hero-stat-label">기록 기간</span>
+      <span class="hero-stat-value hero-stat-value-small" id="stat-period">-</span>
     </div>
-    <div class="ticket-divider" aria-hidden="true"></div>
-    <div class="ticket-item">
-      <span class="ticket-label">추세</span>
-      <span class="ticket-value" id="summary-trend">-</span>
+    <div class="hero-stat">
+      <span class="hero-stat-label">최근 추세</span>
+      <span class="hero-stat-value hero-stat-value-small" id="stat-trend">-</span>
     </div>
-  </section>
-
-  <section class="platform-breakdown" id="platform-breakdown">
-    <!-- 유튜브 / 유튜브 뮤직 등 플랫폼별 카드가 JS로 채워집니다 -->
   </section>
 
   <nav class="tabs" role="tablist">
     <button class="tab-btn active" data-tab="chat" role="tab" aria-selected="true">채팅</button>
+    <button class="tab-btn" data-tab="insights" role="tab" aria-selected="false">인사이트</button>
     <button class="tab-btn" data-tab="data" role="tab" aria-selected="false">데이터 관리</button>
     <button class="tab-btn" data-tab="history" role="tab" aria-selected="false">대화 기록</button>
   </nav>
@@ -67,6 +64,50 @@
       </form>
     </section>
 
+    <!-- 인사이트 탭 -->
+    <section id="tab-insights" class="tab-pane">
+      <div class="insight-block">
+        <div class="insight-block-header">
+          <h2 class="insight-title">일별 시청 캘린더</h2>
+          <div class="heatmap-legend">
+            <span>적음</span>
+            <span class="legend-swatch legend-0"></span>
+            <span class="legend-swatch legend-1"></span>
+            <span class="legend-swatch legend-2"></span>
+            <span class="legend-swatch legend-3"></span>
+            <span class="legend-swatch legend-4"></span>
+            <span>많음</span>
+          </div>
+        </div>
+        <div class="heatmap-scroll">
+          <div class="heatmap-grid" id="heatmap-grid"></div>
+        </div>
+        <p class="insight-caption" id="heatmap-caption">불러오는 중...</p>
+      </div>
+
+      <div class="insight-block">
+        <h2 class="insight-title">시청 시간 추이</h2>
+        <div class="chart-card">
+          <canvas id="trend-chart" height="220"></canvas>
+        </div>
+      </div>
+
+      <div class="insight-split">
+        <div class="insight-block">
+          <h2 class="insight-title">플랫폼별 비중</h2>
+          <div class="chart-card chart-card-small">
+            <canvas id="platform-chart"></canvas>
+          </div>
+        </div>
+        <div class="insight-block">
+          <h2 class="insight-title">롱폼 vs 숏폼</h2>
+          <div class="chart-card chart-card-small">
+            <canvas id="formtype-chart"></canvas>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- 데이터 관리 탭 -->
     <section id="tab-data" class="tab-pane">
       <form class="data-form" id="data-form">
@@ -83,6 +124,7 @@
           <select id="input-platform">
             <option value="netflix">Netflix</option>
             <option value="youtube">YouTube</option>
+            <option value="youtube_music">YouTube Music</option>
             <option value="youtube_shorts">YouTube Shorts</option>
             <option value="instagram_reels">Instagram Reels</option>
             <option value="disney_plus">Disney+</option>
