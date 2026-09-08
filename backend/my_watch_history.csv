@@ -1,147 +1,181 @@
 date,value,memo,platform,content_type
-2022-11-26,8,1개 시청 (평균 8분 가정),youtube,long_form
-2022-12-09,8,1개 시청 (평균 8분 가정),youtube,long_form
-2022-12-16,1,1개 시청 (평균 1분 가정),youtube,short_form
-2022-12-29,8,1개 시청 (평균 8분 가정),youtube,long_form
-2023-02-03,8,1개 시청 (평균 8분 가정),youtube,long_form
-2024-03-06,64,8개 시청 (평균 8분 가정),youtube,long_form
-2024-08-14,8,1개 시청 (평균 8분 가정),youtube,long_form
-2024-08-25,176,22개 시청 (평균 8분 가정),youtube,long_form
-2024-08-25,2,2개 시청 (평균 1분 가정),youtube,short_form
-2024-11-26,8,1개 시청 (평균 8분 가정),youtube,long_form
-2025-04-30,8,1개 시청 (평균 8분 가정),youtube,long_form
-2025-11-25,16,2개 시청 (평균 8분 가정),youtube,long_form
-2026-01-30,88,11개 시청 (평균 8분 가정),youtube,long_form
-2026-03-03,8,1개 시청 (평균 8분 가정),youtube,long_form
-2026-03-17,24,3개 시청 (평균 8분 가정),youtube,long_form
-2026-03-21,8,1개 시청 (평균 8분 가정),youtube,long_form
-2026-04-05,8,1개 시청 (평균 8분 가정),youtube,long_form
-2026-04-29,8,1개 시청 (평균 8분 가정),youtube,long_form
-2026-05-23,8,1개 시청 (평균 8분 가정),youtube,long_form
-2026-06-11,8,1개 시청 (평균 8분 가정),youtube,long_form
-2026-06-13,8,1개 시청 (평균 8분 가정),youtube,long_form
-2026-06-15,8,1개 시청 (평균 8분 가정),youtube,long_form
-2026-06-16,568,71개 시청 (평균 8분 가정),youtube,long_form
-2026-06-16,1,1개 시청 (평균 1분 가정),youtube,short_form
-2026-06-17,768,96개 시청 (평균 8분 가정),youtube,long_form
-2026-06-17,3,3개 시청 (평균 1분 가정),youtube,short_form
-2026-06-18,1720,215개 시청 (평균 8분 가정),youtube,long_form
-2026-06-18,3,3개 시청 (평균 1분 가정),youtube,short_form
-2026-06-19,1560,195개 시청 (평균 8분 가정),youtube,long_form
-2026-06-19,5,5개 시청 (평균 1분 가정),youtube,short_form
-2026-06-20,1224,153개 시청 (평균 8분 가정),youtube,long_form
-2026-06-20,3,3개 시청 (평균 1분 가정),youtube,short_form
-2026-06-21,3152,394개 시청 (평균 8분 가정),youtube,long_form
-2026-06-21,20,20개 시청 (평균 1분 가정),youtube,short_form
-2026-06-22,1664,208개 시청 (평균 8분 가정),youtube,long_form
-2026-06-22,4,4개 시청 (평균 1분 가정),youtube,short_form
-2026-06-23,2248,281개 시청 (평균 8분 가정),youtube,long_form
-2026-06-23,8,8개 시청 (평균 1분 가정),youtube,short_form
-2026-06-24,2208,276개 시청 (평균 8분 가정),youtube,long_form
-2026-06-24,6,6개 시청 (평균 1분 가정),youtube,short_form
-2026-06-25,2816,352개 시청 (평균 8분 가정),youtube,long_form
-2026-06-25,13,13개 시청 (평균 1분 가정),youtube,short_form
-2026-06-26,1280,160개 시청 (평균 8분 가정),youtube,long_form
-2026-06-26,5,5개 시청 (평균 1분 가정),youtube,short_form
-2026-06-27,1888,236개 시청 (평균 8분 가정),youtube,long_form
-2026-06-27,6,6개 시청 (평균 1분 가정),youtube,short_form
-2026-06-28,2320,290개 시청 (평균 8분 가정),youtube,long_form
-2026-06-28,14,14개 시청 (평균 1분 가정),youtube,short_form
-2026-06-29,2160,270개 시청 (평균 8분 가정),youtube,long_form
-2026-06-29,14,14개 시청 (평균 1분 가정),youtube,short_form
-2026-06-30,1800,225개 시청 (평균 8분 가정),youtube,long_form
-2026-06-30,10,10개 시청 (평균 1분 가정),youtube,short_form
-2026-07-01,2192,274개 시청 (평균 8분 가정),youtube,long_form
-2026-07-01,14,14개 시청 (평균 1분 가정),youtube,short_form
-2026-07-02,3048,381개 시청 (평균 8분 가정),youtube,long_form
-2026-07-02,14,14개 시청 (평균 1분 가정),youtube,short_form
-2026-07-03,1064,133개 시청 (평균 8분 가정),youtube,long_form
-2026-07-03,14,14개 시청 (평균 1분 가정),youtube,short_form
-2026-07-04,1736,217개 시청 (평균 8분 가정),youtube,long_form
-2026-07-04,20,20개 시청 (평균 1분 가정),youtube,short_form
-2026-07-05,2496,312개 시청 (평균 8분 가정),youtube,long_form
-2026-07-05,25,25개 시청 (평균 1분 가정),youtube,short_form
-2026-07-06,2944,368개 시청 (평균 8분 가정),youtube,long_form
-2026-07-06,22,22개 시청 (평균 1분 가정),youtube,short_form
-2026-07-07,2632,329개 시청 (평균 8분 가정),youtube,long_form
-2026-07-07,17,17개 시청 (평균 1분 가정),youtube,short_form
-2026-07-08,1040,130개 시청 (평균 8분 가정),youtube,long_form
-2026-07-08,10,10개 시청 (평균 1분 가정),youtube,short_form
-2026-07-09,4072,509개 시청 (평균 8분 가정),youtube,long_form
-2026-07-09,18,18개 시청 (평균 1분 가정),youtube,short_form
-2026-07-10,2192,274개 시청 (평균 8분 가정),youtube,long_form
-2026-07-10,11,11개 시청 (평균 1분 가정),youtube,short_form
-2026-07-11,1808,226개 시청 (평균 8분 가정),youtube,long_form
-2026-07-11,13,13개 시청 (평균 1분 가정),youtube,short_form
-2026-07-12,2688,336개 시청 (평균 8분 가정),youtube,long_form
-2026-07-12,22,22개 시청 (평균 1분 가정),youtube,short_form
-2026-07-13,2824,353개 시청 (평균 8분 가정),youtube,long_form
-2026-07-13,8,8개 시청 (평균 1분 가정),youtube,short_form
-2026-07-14,2104,263개 시청 (평균 8분 가정),youtube,long_form
-2026-07-14,1,1개 시청 (평균 1분 가정),youtube,short_form
-2026-07-15,1496,187개 시청 (평균 8분 가정),youtube,long_form
-2026-07-15,8,8개 시청 (평균 1분 가정),youtube,short_form
-2026-07-16,3128,391개 시청 (평균 8분 가정),youtube,long_form
-2026-07-16,12,12개 시청 (평균 1분 가정),youtube,short_form
-2026-07-17,2072,259개 시청 (평균 8분 가정),youtube,long_form
-2026-07-17,9,9개 시청 (평균 1분 가정),youtube,short_form
-2026-07-18,1536,192개 시청 (평균 8분 가정),youtube,long_form
-2026-07-18,2,2개 시청 (평균 1분 가정),youtube,short_form
-2026-07-19,2912,364개 시청 (평균 8분 가정),youtube,long_form
-2026-07-19,32,32개 시청 (평균 1분 가정),youtube,short_form
-2026-07-20,2864,358개 시청 (평균 8분 가정),youtube,long_form
-2026-07-20,23,23개 시청 (평균 1분 가정),youtube,short_form
-2026-07-21,3112,389개 시청 (평균 8분 가정),youtube,long_form
-2026-07-21,13,13개 시청 (평균 1분 가정),youtube,short_form
-2026-07-22,2112,264개 시청 (평균 8분 가정),youtube,long_form
-2026-07-22,14,14개 시청 (평균 1분 가정),youtube,short_form
-2026-07-23,19,19개 시청 (평균 1분 가정),youtube,short_form
-2026-07-23,3504,438개 시청 (평균 8분 가정),youtube,long_form
-2026-07-24,2320,290개 시청 (평균 8분 가정),youtube,long_form
-2026-07-24,51,51개 시청 (평균 1분 가정),youtube,short_form
-2026-07-25,1592,199개 시청 (평균 8분 가정),youtube,long_form
-2026-07-25,6,6개 시청 (평균 1분 가정),youtube,short_form
-2026-07-26,2608,326개 시청 (평균 8분 가정),youtube,long_form
-2026-07-26,44,44개 시청 (평균 1분 가정),youtube,short_form
-2026-07-27,3528,441개 시청 (평균 8분 가정),youtube,long_form
-2026-07-27,14,14개 시청 (평균 1분 가정),youtube,short_form
-2026-07-28,1664,208개 시청 (평균 8분 가정),youtube,long_form
-2026-07-28,4,4개 시청 (평균 1분 가정),youtube,short_form
-2026-07-29,2840,355개 시청 (평균 8분 가정),youtube,long_form
-2026-07-29,7,7개 시청 (평균 1분 가정),youtube,short_form
-2026-07-30,3048,381개 시청 (평균 8분 가정),youtube,long_form
-2026-07-30,21,21개 시청 (평균 1분 가정),youtube,short_form
-2026-07-31,2344,293개 시청 (평균 8분 가정),youtube,long_form
-2026-07-31,24,24개 시청 (평균 1분 가정),youtube,short_form
-2026-08-01,2536,317개 시청 (평균 8분 가정),youtube,long_form
-2026-08-01,18,18개 시청 (평균 1분 가정),youtube,short_form
-2026-08-02,976,122개 시청 (평균 8분 가정),youtube,long_form
-2026-08-02,2,2개 시청 (평균 1분 가정),youtube,short_form
-2026-08-03,1904,238개 시청 (평균 8분 가정),youtube,long_form
-2026-08-03,5,5개 시청 (평균 1분 가정),youtube,short_form
-2026-08-04,1272,159개 시청 (평균 8분 가정),youtube,long_form
-2026-08-04,3,3개 시청 (평균 1분 가정),youtube,short_form
-2026-08-05,536,67개 시청 (평균 8분 가정),youtube,long_form
-2026-08-06,3104,388개 시청 (평균 8분 가정),youtube,long_form
-2026-08-06,25,25개 시청 (평균 1분 가정),youtube,short_form
-2026-08-07,968,121개 시청 (평균 8분 가정),youtube,long_form
-2026-08-07,17,17개 시청 (평균 1분 가정),youtube,short_form
-2026-08-08,1536,192개 시청 (평균 8분 가정),youtube,long_form
-2026-08-08,14,14개 시청 (평균 1분 가정),youtube,short_form
-2026-08-09,1592,199개 시청 (평균 8분 가정),youtube,long_form
-2026-08-09,7,7개 시청 (평균 1분 가정),youtube,short_form
-2026-08-10,1936,242개 시청 (평균 8분 가정),youtube,long_form
-2026-08-10,8,8개 시청 (평균 1분 가정),youtube,short_form
-2026-08-11,2784,348개 시청 (평균 8분 가정),youtube,long_form
-2026-08-11,13,13개 시청 (평균 1분 가정),youtube,short_form
-2026-08-12,1336,167개 시청 (평균 8분 가정),youtube,long_form
-2026-08-12,5,5개 시청 (평균 1분 가정),youtube,short_form
-2026-08-13,1640,205개 시청 (평균 8분 가정),youtube,long_form
-2026-08-13,3,3개 시청 (평균 1분 가정),youtube,short_form
-2026-08-14,2128,266개 시청 (평균 8분 가정),youtube,long_form
-2026-08-14,9,9개 시청 (평균 1분 가정),youtube,short_form
-2026-08-15,1824,228개 시청 (평균 8분 가정),youtube,long_form
-2026-08-15,4,4개 시청 (평균 1분 가정),youtube,short_form
-2026-08-16,2328,291개 시청 (평균 8분 가정),youtube,long_form
-2026-08-16,7,7개 시청 (평균 1분 가정),youtube,short_form
-2026-08-31,8,1개 시청 (평균 8분 가정),youtube,long_form
+2026-06-16,39,25개 시청 (시간 간격 기반 추정),youtube,long_form
+2026-06-16,0,1개 시청 (시간 간격 기반 추정),youtube,short_form
+2026-06-16,133,46곡 재생 (시간 간격 기반 추정),youtube_music,long_form
+2026-06-17,96,55개 시청 (시간 간격 기반 추정),youtube,long_form
+2026-06-17,3,3개 시청 (시간 간격 기반 추정),youtube,short_form
+2026-06-17,129,41곡 재생 (시간 간격 기반 추정),youtube_music,long_form
+2026-06-18,124,102개 시청 (시간 간격 기반 추정),youtube,long_form
+2026-06-18,2,3개 시청 (시간 간격 기반 추정),youtube,short_form
+2026-06-18,348,113곡 재생 (시간 간격 기반 추정),youtube_music,long_form
+2026-06-19,133,120개 시청 (시간 간격 기반 추정),youtube,long_form
+2026-06-19,3,5개 시청 (시간 간격 기반 추정),youtube,short_form
+2026-06-19,229,75곡 재생 (시간 간격 기반 추정),youtube_music,long_form
+2026-06-20,117,103개 시청 (시간 간격 기반 추정),youtube,long_form
+2026-06-20,1,3개 시청 (시간 간격 기반 추정),youtube,short_form
+2026-06-20,151,50곡 재생 (시간 간격 기반 추정),youtube_music,long_form
+2026-06-21,303,392개 시청 (시간 간격 기반 추정),youtube,long_form
+2026-06-21,11,20개 시청 (시간 간격 기반 추정),youtube,short_form
+2026-06-21,7,2곡 재생 (시간 간격 기반 추정),youtube_music,long_form
+2026-06-22,106,120개 시청 (시간 간격 기반 추정),youtube,long_form
+2026-06-22,3,4개 시청 (시간 간격 기반 추정),youtube,short_form
+2026-06-22,228,88곡 재생 (시간 간격 기반 추정),youtube_music,long_form
+2026-06-23,182,248개 시청 (시간 간격 기반 추정),youtube,long_form
+2026-06-23,4,8개 시청 (시간 간격 기반 추정),youtube,short_form
+2026-06-23,109,33곡 재생 (시간 간격 기반 추정),youtube_music,long_form
+2026-06-24,2,6개 시청 (시간 간격 기반 추정),youtube,short_form
+2026-06-24,172,224개 시청 (시간 간격 기반 추정),youtube,long_form
+2026-06-24,140,52곡 재생 (시간 간격 기반 추정),youtube_music,long_form
+2026-06-25,230,331개 시청 (시간 간격 기반 추정),youtube,long_form
+2026-06-25,4,13개 시청 (시간 간격 기반 추정),youtube,short_form
+2026-06-25,64,21곡 재생 (시간 간격 기반 추정),youtube_music,long_form
+2026-06-26,129,152개 시청 (시간 간격 기반 추정),youtube,long_form
+2026-06-26,3,5개 시청 (시간 간격 기반 추정),youtube,short_form
+2026-06-26,26,8곡 재생 (시간 간격 기반 추정),youtube_music,long_form
+2026-06-27,161,187개 시청 (시간 간격 기반 추정),youtube,long_form
+2026-06-27,4,6개 시청 (시간 간격 기반 추정),youtube,short_form
+2026-06-27,157,49곡 재생 (시간 간격 기반 추정),youtube_music,long_form
+2026-06-28,215,276개 시청 (시간 간격 기반 추정),youtube,long_form
+2026-06-28,8,14개 시청 (시간 간격 기반 추정),youtube,short_form
+2026-06-28,44,14곡 재생 (시간 간격 기반 추정),youtube_music,long_form
+2026-06-29,140,169개 시청 (시간 간격 기반 추정),youtube,long_form
+2026-06-29,10,14개 시청 (시간 간격 기반 추정),youtube,short_form
+2026-06-29,339,101곡 재생 (시간 간격 기반 추정),youtube_music,long_form
+2026-06-30,174,192개 시청 (시간 간격 기반 추정),youtube,long_form
+2026-06-30,5,10개 시청 (시간 간격 기반 추정),youtube,short_form
+2026-06-30,106,33곡 재생 (시간 간격 기반 추정),youtube_music,long_form
+2026-07-01,229,248개 시청 (시간 간격 기반 추정),youtube,long_form
+2026-07-01,8,14개 시청 (시간 간격 기반 추정),youtube,short_form
+2026-07-01,91,26곡 재생 (시간 간격 기반 추정),youtube_music,long_form
+2026-07-02,171,249개 시청 (시간 간격 기반 추정),youtube,long_form
+2026-07-02,8,14개 시청 (시간 간격 기반 추정),youtube,short_form
+2026-07-02,394,132곡 재생 (시간 간격 기반 추정),youtube_music,long_form
+2026-07-03,114,107개 시청 (시간 간격 기반 추정),youtube,long_form
+2026-07-03,8,14개 시청 (시간 간격 기반 추정),youtube,short_form
+2026-07-03,91,26곡 재생 (시간 간격 기반 추정),youtube_music,long_form
+2026-07-04,212,209개 시청 (시간 간격 기반 추정),youtube,long_form
+2026-07-04,12,20개 시청 (시간 간격 기반 추정),youtube,short_form
+2026-07-04,22,8곡 재생 (시간 간격 기반 추정),youtube_music,long_form
+2026-07-05,226,298개 시청 (시간 간격 기반 추정),youtube,long_form
+2026-07-05,14,25개 시청 (시간 간격 기반 추정),youtube,short_form
+2026-07-05,46,14곡 재생 (시간 간격 기반 추정),youtube_music,long_form
+2026-07-06,10,22개 시청 (시간 간격 기반 추정),youtube,short_form
+2026-07-06,185,302개 시청 (시간 간격 기반 추정),youtube,long_form
+2026-07-06,197,66곡 재생 (시간 간격 기반 추정),youtube_music,long_form
+2026-07-07,216,254개 시청 (시간 간격 기반 추정),youtube,long_form
+2026-07-07,10,17개 시청 (시간 간격 기반 추정),youtube,short_form
+2026-07-07,199,75곡 재생 (시간 간격 기반 추정),youtube_music,long_form
+2026-07-08,135,130개 시청 (시간 간격 기반 추정),youtube,long_form
+2026-07-08,3,10개 시청 (시간 간격 기반 추정),youtube,short_form
+2026-07-09,372,447개 시청 (시간 간격 기반 추정),youtube,long_form
+2026-07-09,8,18개 시청 (시간 간격 기반 추정),youtube,short_form
+2026-07-09,168,62곡 재생 (시간 간격 기반 추정),youtube_music,long_form
+2026-07-10,220,217개 시청 (시간 간격 기반 추정),youtube,long_form
+2026-07-10,5,11개 시청 (시간 간격 기반 추정),youtube,short_form
+2026-07-10,156,57곡 재생 (시간 간격 기반 추정),youtube_music,long_form
+2026-07-11,214,213개 시청 (시간 간격 기반 추정),youtube,long_form
+2026-07-11,7,13개 시청 (시간 간격 기반 추정),youtube,short_form
+2026-07-11,32,13곡 재생 (시간 간격 기반 추정),youtube_music,long_form
+2026-07-12,276,331개 시청 (시간 간격 기반 추정),youtube,long_form
+2026-07-12,12,22개 시청 (시간 간격 기반 추정),youtube,short_form
+2026-07-12,15,5곡 재생 (시간 간격 기반 추정),youtube_music,long_form
+2026-07-13,181,209개 시청 (시간 간격 기반 추정),youtube,long_form
+2026-07-13,4,8개 시청 (시간 간격 기반 추정),youtube,short_form
+2026-07-13,393,144곡 재생 (시간 간격 기반 추정),youtube_music,long_form
+2026-07-14,146,195개 시청 (시간 간격 기반 추정),youtube,long_form
+2026-07-14,1,1개 시청 (시간 간격 기반 추정),youtube,short_form
+2026-07-14,201,68곡 재생 (시간 간격 기반 추정),youtube_music,long_form
+2026-07-15,150,186개 시청 (시간 간격 기반 추정),youtube,long_form
+2026-07-15,4,8개 시청 (시간 간격 기반 추정),youtube,short_form
+2026-07-15,4,1곡 재생 (시간 간격 기반 추정),youtube_music,long_form
+2026-07-16,333,364개 시청 (시간 간격 기반 추정),youtube,long_form
+2026-07-16,5,12개 시청 (시간 간격 기반 추정),youtube,short_form
+2026-07-16,66,27곡 재생 (시간 간격 기반 추정),youtube_music,long_form
+2026-07-17,209,214개 시청 (시간 간격 기반 추정),youtube,long_form
+2026-07-17,5,9개 시청 (시간 간격 기반 추정),youtube,short_form
+2026-07-17,121,45곡 재생 (시간 간격 기반 추정),youtube_music,long_form
+2026-07-18,240,192개 시청 (시간 간격 기반 추정),youtube,long_form
+2026-07-18,1,2개 시청 (시간 간격 기반 추정),youtube,short_form
+2026-07-19,367,364개 시청 (시간 간격 기반 추정),youtube,long_form
+2026-07-19,21,32개 시청 (시간 간격 기반 추정),youtube,short_form
+2026-07-20,220,280개 시청 (시간 간격 기반 추정),youtube,long_form
+2026-07-20,14,23개 시청 (시간 간격 기반 추정),youtube,short_form
+2026-07-20,202,78곡 재생 (시간 간격 기반 추정),youtube_music,long_form
+2026-07-21,232,280개 시청 (시간 간격 기반 추정),youtube,long_form
+2026-07-21,8,13개 시청 (시간 간격 기반 추정),youtube,short_form
+2026-07-21,315,109곡 재생 (시간 간격 기반 추정),youtube_music,long_form
+2026-07-22,189,262개 시청 (시간 간격 기반 추정),youtube,long_form
+2026-07-22,5,14개 시청 (시간 간격 기반 추정),youtube,short_form
+2026-07-22,8,2곡 재생 (시간 간격 기반 추정),youtube_music,long_form
+2026-07-23,267,391개 시청 (시간 간격 기반 추정),youtube,long_form
+2026-07-23,13,19개 시청 (시간 간격 기반 추정),youtube,short_form
+2026-07-23,148,47곡 재생 (시간 간격 기반 추정),youtube_music,long_form
+2026-07-24,184,232개 시청 (시간 간격 기반 추정),youtube,long_form
+2026-07-24,28,51개 시청 (시간 간격 기반 추정),youtube,short_form
+2026-07-24,135,58곡 재생 (시간 간격 기반 추정),youtube_music,long_form
+2026-07-25,219,196개 시청 (시간 간격 기반 추정),youtube,long_form
+2026-07-25,1,6개 시청 (시간 간격 기반 추정),youtube,short_form
+2026-07-25,10,3곡 재생 (시간 간격 기반 추정),youtube_music,long_form
+2026-07-26,278,324개 시청 (시간 간격 기반 추정),youtube,long_form
+2026-07-26,30,44개 시청 (시간 간격 기반 추정),youtube,short_form
+2026-07-26,8,2곡 재생 (시간 간격 기반 추정),youtube_music,long_form
+2026-07-27,181,264개 시청 (시간 간격 기반 추정),youtube,long_form
+2026-07-27,7,14개 시청 (시간 간격 기반 추정),youtube,short_form
+2026-07-27,396,177곡 재생 (시간 간격 기반 추정),youtube_music,long_form
+2026-07-28,117,94개 시청 (시간 간격 기반 추정),youtube,long_form
+2026-07-28,2,4개 시청 (시간 간격 기반 추정),youtube,short_form
+2026-07-28,351,114곡 재생 (시간 간격 기반 추정),youtube_music,long_form
+2026-07-29,252,257개 시청 (시간 간격 기반 추정),youtube,long_form
+2026-07-29,4,7개 시청 (시간 간격 기반 추정),youtube,short_form
+2026-07-29,324,98곡 재생 (시간 간격 기반 추정),youtube_music,long_form
+2026-07-30,204,255개 시청 (시간 간격 기반 추정),youtube,long_form
+2026-07-30,13,21개 시청 (시간 간격 기반 추정),youtube,short_form
+2026-07-30,306,126곡 재생 (시간 간격 기반 추정),youtube_music,long_form
+2026-07-31,202,218개 시청 (시간 간격 기반 추정),youtube,long_form
+2026-07-31,16,24개 시청 (시간 간격 기반 추정),youtube,short_form
+2026-07-31,180,75곡 재생 (시간 간격 기반 추정),youtube_music,long_form
+2026-08-01,291,260개 시청 (시간 간격 기반 추정),youtube,long_form
+2026-08-01,8,18개 시청 (시간 간격 기반 추정),youtube,short_form
+2026-08-01,151,57곡 재생 (시간 간격 기반 추정),youtube_music,long_form
+2026-08-02,114,110개 시청 (시간 간격 기반 추정),youtube,long_form
+2026-08-02,0,2개 시청 (시간 간격 기반 추정),youtube,short_form
+2026-08-02,43,12곡 재생 (시간 간격 기반 추정),youtube_music,long_form
+2026-08-03,120,137개 시청 (시간 간격 기반 추정),youtube,long_form
+2026-08-03,3,5개 시청 (시간 간격 기반 추정),youtube,short_form
+2026-08-03,291,101곡 재생 (시간 간격 기반 추정),youtube_music,long_form
+2026-08-04,83,68개 시청 (시간 간격 기반 추정),youtube,long_form
+2026-08-04,1,3개 시청 (시간 간격 기반 추정),youtube,short_form
+2026-08-04,269,91곡 재생 (시간 간격 기반 추정),youtube_music,long_form
+2026-08-05,92,54개 시청 (시간 간격 기반 추정),youtube,long_form
+2026-08-05,43,13곡 재생 (시간 간격 기반 추정),youtube_music,long_form
+2026-08-06,305,300개 시청 (시간 간격 기반 추정),youtube,long_form
+2026-08-06,11,25개 시청 (시간 간격 기반 추정),youtube,short_form
+2026-08-06,220,88곡 재생 (시간 간격 기반 추정),youtube_music,long_form
+2026-08-07,110,102개 시청 (시간 간격 기반 추정),youtube,long_form
+2026-08-07,12,17개 시청 (시간 간격 기반 추정),youtube,short_form
+2026-08-07,56,19곡 재생 (시간 간격 기반 추정),youtube_music,long_form
+2026-08-08,195,192개 시청 (시간 간격 기반 추정),youtube,long_form
+2026-08-08,7,14개 시청 (시간 간격 기반 추정),youtube,short_form
+2026-08-09,218,190개 시청 (시간 간격 기반 추정),youtube,long_form
+2026-08-09,3,7개 시청 (시간 간격 기반 추정),youtube,short_form
+2026-08-09,32,9곡 재생 (시간 간격 기반 추정),youtube_music,long_form
+2026-08-10,203,217개 시청 (시간 간격 기반 추정),youtube,long_form
+2026-08-10,6,8개 시청 (시간 간격 기반 추정),youtube,short_form
+2026-08-10,85,25곡 재생 (시간 간격 기반 추정),youtube_music,long_form
+2026-08-11,327,327개 시청 (시간 간격 기반 추정),youtube,long_form
+2026-08-11,4,13개 시청 (시간 간격 기반 추정),youtube,short_form
+2026-08-11,75,21곡 재생 (시간 간격 기반 추정),youtube_music,long_form
+2026-08-12,176,161개 시청 (시간 간격 기반 추정),youtube,long_form
+2026-08-12,3,5개 시청 (시간 간격 기반 추정),youtube,short_form
+2026-08-12,21,6곡 재생 (시간 간격 기반 추정),youtube_music,long_form
+2026-08-13,134,158개 시청 (시간 간격 기반 추정),youtube,long_form
+2026-08-13,2,3개 시청 (시간 간격 기반 추정),youtube,short_form
+2026-08-13,152,47곡 재생 (시간 간격 기반 추정),youtube_music,long_form
+2026-08-14,204,238개 시청 (시간 간격 기반 추정),youtube,long_form
+2026-08-14,5,9개 시청 (시간 간격 기반 추정),youtube,short_form
+2026-08-14,96,28곡 재생 (시간 간격 기반 추정),youtube_music,long_form
+2026-08-15,225,228개 시청 (시간 간격 기반 추정),youtube,long_form
+2026-08-15,2,4개 시청 (시간 간격 기반 추정),youtube,short_form
+2026-08-16,267,291개 시청 (시간 간격 기반 추정),youtube,long_form
+2026-08-16,2,7개 시청 (시간 간격 기반 추정),youtube,short_form
+2026-08-31,3,1개 시청 (시간 간격 기반 추정),youtube,long_form

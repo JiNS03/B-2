@@ -38,9 +38,23 @@ from bs4 import BeautifulSoup
 INPUT_FILE = "시청 기록.html"
 OUTPUT_FILE = "my_watch_history.csv"
 
-AVG_MINUTES_YOUTUBE_LONGFORM = 8
+# 이 날짜 이전 기록은 제외합니다 (계정 초창기의 듬성듬성한 데이터,
+# 즉 "가끔 한 번씩 보던 시기"를 빼고 최근 연속된 습관 구간만 사용하기 위함).
+# 본인 CSV를 열어보고 데이터가 촘촘해지기 시작하는 날짜로 맞추세요.
+FILTER_START_DATE = "2026-06-16"
+
+# 영상 1개당 평균 시청 시간(분) 가정치.
+# 주의: 하루에 수십~수백 개를 "시청함"으로 기록하는 경우, 대부분 짧게
+# 훑어보거나 자동재생으로 스킵한 영상입니다. 8분처럼 큰 값을 쓰면
+# "하루 500개 * 8분 = 66시간 시청"처럼 물리적으로 불가능한 값이 나옵니다.
+# 본인의 실제 시청 패턴에 맞게 낮춰서 조정하세요 (예: 2~3분).
+AVG_MINUTES_YOUTUBE_LONGFORM = 3
 AVG_MINUTES_YOUTUBE_SHORTFORM = 1
 AVG_MINUTES_MUSIC = 4
+
+# 연속된 두 시청 사이의 간격이 이 값보다 짧게 잘리지 않도록 하는 최소값(분).
+# 너무 0에 가깝게 잘리면 "봤다"는 사실 자체가 무의미해지는 걸 막기 위함입니다.
+MIN_MINUTES_PER_ENTRY = 0.2
 
 # 실제 시청 이벤트로 인정하지 않는 활동 문구 (제목이 없는 라인에서 확인)
 NON_WATCH_MARKERS = ["목록을 확인함", "게시물을 조회함", "댓글을 남김"]
@@ -90,6 +104,14 @@ def parse_html(path: str):
         if not content_cells:
             continue
 
+        # 헤더(맨 위 제목)에 "YouTube Music"이라고 표시되는 경우가 있어
+        # 유튜브 뮤직 여부를 여기서 우선 판별합니다.
+        # (반면 "제품:" 항목은 두 경우 모두 그냥 "YouTube"로만 표기되어
+        #  구분이 안 될 수 있음)
+        header_cell = entry.find("div", class_="header-cell")
+        header_text = header_cell.get_text() if header_cell else ""
+        is_music = "YouTube Music" in header_text or "유튜브 뮤직" in header_text
+
         main_cell = content_cells[0]
         full_text = main_cell.get_text(separator="\n").strip()
 
@@ -111,9 +133,12 @@ def parse_html(path: str):
             failed_dates.append(time_line)
             continue
 
-        # Products("제품") 항목으로 유튜브 뮤직 여부 판별
-        is_music = False
-        if len(content_cells) > 1:
+        # 지정한 시작일 이전 기록은 제외 (듬성듬성한 초창기 데이터 제거)
+        if FILTER_START_DATE and dt.date().isoformat() < FILTER_START_DATE:
+            continue
+
+        # 헤더에서 못 찾았다면 "제품:" 항목도 보조로 확인 (혹시 모를 다른 형식 대비)
+        if not is_music and len(content_cells) > 1:
             products_text = content_cells[1].get_text()
             if "YouTube Music" in products_text or "유튜브 뮤직" in products_text:
                 is_music = True
@@ -121,34 +146,83 @@ def parse_html(path: str):
         platform = "youtube_music" if is_music else "youtube"
         content_type = "long_form" if is_music else ("short_form" if is_shortform_by_title(title_text) else "long_form")
 
-        records.append({"date": dt.date().isoformat(), "platform": platform, "content_type": content_type})
+        # 날짜만이 아니라 시각(시:분:초)까지 전체 datetime을 그대로 보관합니다.
+        # (다음 단계에서 "연속된 두 시청 사이의 실제 간격"을 계산하는 데 필요)
+        records.append({"datetime": dt, "platform": platform, "content_type": content_type})
 
     return records, failed_dates, skipped_non_watch
 
 
-def aggregate(records):
-    counts = defaultdict(int)
+def default_avg_minutes(platform: str, content_type: str) -> float:
+    if platform == "youtube_music":
+        return AVG_MINUTES_MUSIC
+    if content_type == "short_form":
+        return AVG_MINUTES_YOUTUBE_SHORTFORM
+    return AVG_MINUTES_YOUTUBE_LONGFORM
+
+
+def compute_durations(records):
+    """
+    같은 날짜 안에서 시각순으로 정렬한 뒤,
+    '이 영상을 본 시각'과 '바로 다음 영상을 본 시각' 사이의 간격을
+    실제 시청 시간의 상한선으로 사용합니다.
+
+    예) 평균 가정치가 3분이어도 다음 영상까지 20초밖에 안 걸렸다면
+        실제로는 20초 이상 볼 수 없었을 것이므로 20초로 계산합니다.
+    하루의 마지막 기록은 비교할 다음 시각이 없으므로 평균 가정치를 그대로 씁니다.
+    """
+    by_date = defaultdict(list)
     for r in records:
-        key = (r["date"], r["platform"], r["content_type"])
+        by_date[r["datetime"].date()].append(r)
+
+    computed = []
+    for day, day_records in by_date.items():
+        day_records.sort(key=lambda r: r["datetime"])
+        for i, r in enumerate(day_records):
+            avg = default_avg_minutes(r["platform"], r["content_type"])
+
+            if i + 1 < len(day_records):
+                gap_minutes = (day_records[i + 1]["datetime"] - r["datetime"]).total_seconds() / 60
+                duration = min(avg, gap_minutes) if gap_minutes > 0 else avg
+            else:
+                duration = avg
+
+            # 너무 짧게(0에 가깝게) 잘리는 것을 막기 위한 최소값
+            duration = max(duration, MIN_MINUTES_PER_ENTRY)
+
+            computed.append(
+                {
+                    "date": day.isoformat(),
+                    "platform": r["platform"],
+                    "content_type": r["content_type"],
+                    "duration": duration,
+                }
+            )
+
+    return computed
+
+
+def aggregate(computed):
+    """
+    (날짜, 플랫폼, 콘텐츠형태) 기준으로 실제 계산된 duration(분)을 합산합니다.
+    """
+    sums = defaultdict(float)
+    counts = defaultdict(int)
+    for c in computed:
+        key = (c["date"], c["platform"], c["content_type"])
+        sums[key] += c["duration"]
         counts[key] += 1
 
     rows = []
-    for (date_str, platform, content_type), count in counts.items():
-        if platform == "youtube_music":
-            avg = AVG_MINUTES_MUSIC
-            unit_label = "곡 재생"
-        elif content_type == "short_form":
-            avg = AVG_MINUTES_YOUTUBE_SHORTFORM
-            unit_label = "개 시청"
-        else:
-            avg = AVG_MINUTES_YOUTUBE_LONGFORM
-            unit_label = "개 시청"
-
+    for key, total_minutes in sums.items():
+        date_str, platform, content_type = key
+        count = counts[key]
+        unit_label = "곡 재생" if platform == "youtube_music" else "개 시청"
         rows.append(
             {
                 "date": date_str,
-                "value": count * avg,
-                "memo": f"{count}{unit_label} (평균 {avg}분 가정)",
+                "value": round(total_minutes),
+                "memo": f"{count}{unit_label} (시간 간격 기반 추정)",
                 "platform": platform,
                 "content_type": content_type,
             }
@@ -171,7 +245,8 @@ def main():
         print("파싱된 기록이 없습니다. INPUT_FILE 경로/파일명을 확인하세요.")
         return
 
-    rows = aggregate(records)
+    computed = compute_durations(records)
+    rows = aggregate(computed)
 
     with open(OUTPUT_FILE, "w", newline="", encoding="utf-8") as f:
         writer = csv.DictWriter(f, fieldnames=["date", "value", "memo", "platform", "content_type"])
@@ -179,8 +254,10 @@ def main():
         writer.writerows(rows)
 
     shortform_count = sum(1 for r in records if r["content_type"] == "short_form")
+    max_daily = max((r["value"] for r in rows), default=0)
     print(f"총 {len(rows)}개 행을 {OUTPUT_FILE} 에 저장했습니다.")
     print(f"(날짜 수: {len(set(r['date'] for r in rows))}일, 쇼츠로 판별된 기록: {shortform_count}건)")
+    print(f"단일 (날짜,플랫폼,형태) 조합 최대값: {max_daily}분 (하루 최대 1440분을 넘으면 여러 조합의 합산이라 그럴 수 있습니다)")
 
 
 if __name__ == "__main__":
