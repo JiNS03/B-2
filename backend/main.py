@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-from routers import data, conversations, chat  # noqa: E402  (load_dotenv 이후 import)
+from routers import data, conversations, chat, imports  # noqa: E402  (load_dotenv 이후 import)
 
 app = FastAPI(
     title="시청 습관 AI 비서 API",
@@ -34,6 +34,7 @@ app.add_middleware(
 app.include_router(data.router)
 app.include_router(conversations.router)
 app.include_router(chat.router)
+app.include_router(imports.router)
 
 
 @app.get("/")

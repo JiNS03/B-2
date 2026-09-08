@@ -32,3 +32,4 @@ def get_firestore_client():
 # 컬렉션 이름 상수화 (오타 방지)
 DATA_COLLECTION = "data"
 CONVERSATIONS_COLLECTION = "conversations"
+IMPORT_BATCHES_COLLECTION = "import_batches"

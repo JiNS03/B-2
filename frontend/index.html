@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" data-theme="dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -14,8 +14,14 @@
 <div class="app">
 
   <header class="app-header">
-    <h1 class="app-title">WATCH LOG</h1>
-    <p class="app-subtitle">내 시청 습관을 아는 AI 비서</p>
+    <div class="app-header-text">
+      <h1 class="app-title">WATCH LOG</h1>
+      <p class="app-subtitle">내 시청 습관을 아는 AI 비서</p>
+    </div>
+    <button class="theme-toggle" id="theme-toggle" type="button" aria-label="테마 전환">
+      <span class="theme-icon theme-icon-sun">☀</span>
+      <span class="theme-icon theme-icon-moon">☾</span>
+    </button>
   </header>
 
   <section class="hero-stats" id="hero-stats">
@@ -43,6 +49,7 @@
     <button class="tab-btn active" data-tab="chat" role="tab" aria-selected="true">채팅</button>
     <button class="tab-btn" data-tab="insights" role="tab" aria-selected="false">인사이트</button>
     <button class="tab-btn" data-tab="data" role="tab" aria-selected="false">데이터 관리</button>
+    <button class="tab-btn" data-tab="import" role="tab" aria-selected="false">가져오기</button>
     <button class="tab-btn" data-tab="history" role="tab" aria-selected="false">대화 기록</button>
   </nav>
 
@@ -132,7 +139,7 @@
             <option value="tiktok">TikTok</option>
           </select>
         </div>
-        <div class="form-row">
+        <div class="form-row" id="content-type-row">
           <label for="input-content-type">콘텐츠 형태</label>
           <select id="input-content-type">
             <option value="long_form">롱폼 (OTT/일반영상)</option>
@@ -166,6 +173,62 @@
             <tr><td colspan="6" class="empty-row">불러오는 중...</td></tr>
           </tbody>
         </table>
+      </div>
+    </section>
+
+    <!-- 가져오기 탭 -->
+    <section id="tab-import" class="tab-pane">
+      <div class="insight-block">
+        <h2 class="insight-title">유튜브 시청기록 업로드</h2>
+        <p class="import-desc">
+          Google Takeout에서 받은 유튜브 시청 기록 HTML 파일을 올리면, 자동으로 분석해서
+          날짜별 시청 시간으로 변환해드려요. 영상 제목 등 개인 식별 정보는 저장하지 않습니다.
+        </p>
+
+        <form class="import-form" id="import-form">
+          <div class="import-settings">
+            <div class="form-row">
+              <label for="import-start-date">시작일 필터 (선택)</label>
+              <input type="date" id="import-start-date">
+              <span class="field-hint">비워두면 전체 기간을 사용해요.</span>
+            </div>
+            <div class="form-row">
+              <label for="import-avg-long">롱폼 평균 시청시간(분)</label>
+              <input type="number" id="import-avg-long" min="0.1" step="0.1" value="3">
+            </div>
+            <div class="form-row">
+              <label for="import-avg-short">숏폼 평균 시청시간(분)</label>
+              <input type="number" id="import-avg-short" min="0.1" step="0.1" value="1">
+            </div>
+            <div class="form-row">
+              <label for="import-avg-music">뮤직 평균 재생시간(분)</label>
+              <input type="number" id="import-avg-music" min="0.1" step="0.1" value="4">
+            </div>
+          </div>
+
+          <label class="dropzone" id="dropzone" for="import-file-input">
+            <span class="dropzone-icon">⇪</span>
+            <span class="dropzone-text" id="dropzone-text">클릭해서 HTML 파일 선택 (또는 드래그해서 놓기)</span>
+            <input type="file" id="import-file-input" accept=".html" hidden>
+          </label>
+
+          <button type="submit" class="btn-primary" id="import-submit-btn">업로드 및 분석 시작</button>
+        </form>
+
+        <div class="import-loading" id="import-loading" hidden>
+          <span class="spinner"></span>
+          <span id="import-loading-text">파일을 분석하고 있어요. 파일 크기에 따라 최대 1~2분 걸릴 수 있어요...</span>
+        </div>
+
+        <div class="import-result" id="import-result" hidden></div>
+      </div>
+
+      <div class="insight-block">
+        <h2 class="insight-title">가져오기 기록</h2>
+        <p class="import-desc">지금 화면에 보이는 데이터는 아래 목록 중 "적용됨" 표시가 있는 배치예요. 다른 배치를 눌러 전환할 수 있어요.</p>
+        <ul class="batch-list" id="batch-list">
+          <li class="empty-row">불러오는 중...</li>
+        </ul>
       </div>
     </section>
 

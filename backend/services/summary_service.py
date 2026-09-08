@@ -8,6 +8,7 @@ from typing import List, Dict, Any
 from collections import defaultdict
 
 from services.firebase_service import get_firestore_client, DATA_COLLECTION
+from services.batch_service import get_active_batch_id
 
 
 def _to_dict(doc) -> Dict[str, Any]:
@@ -17,10 +18,23 @@ def _to_dict(doc) -> Dict[str, Any]:
 
 
 def fetch_all_records() -> List[Dict[str, Any]]:
-    """Firestore에서 모든 시청 기록을 날짜순으로 가져온다."""
+    """
+    Firestore에서 시청 기록을 가져온다.
+    단, '가져오기 배치'로 업로드된 데이터는 현재 활성 배치의 것만 포함하고,
+    수동으로 추가한 데이터(batch_id 없음)는 항상 포함한다.
+    """
     db = get_firestore_client()
+    active_batch_id = get_active_batch_id()
+
     docs = db.collection(DATA_COLLECTION).stream()
-    records = [_to_dict(doc) for doc in docs]
+    records = []
+    for doc in docs:
+        d = _to_dict(doc)
+        batch_id = d.get("batch_id")
+        if batch_id and batch_id != active_batch_id:
+            continue  # 비활성 배치의 데이터는 제외
+        records.append(d)
+
     records.sort(key=lambda r: r.get("date", ""))
     return records
 

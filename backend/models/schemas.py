@@ -87,6 +87,28 @@ class SummaryOut(BaseModel):
 
 
 # ---------------------------------------------------------
+# 가져오기 배치 (Takeout HTML 업로드)
+# ---------------------------------------------------------
+class ImportBatchOut(BaseModel):
+    id: str
+    filename: str
+    uploaded_at: str
+    record_count: int
+    period: str
+    is_active: bool
+
+
+class ImportResultOut(BaseModel):
+    batch_id: str
+    filename: str
+    parsed_count: int
+    skipped_non_watch: int
+    saved_row_count: int
+    period: str
+    failed_dates_sample: List[str] = Field(default_factory=list)
+
+
+# ---------------------------------------------------------
 # 대화 기록 (conversations 컬렉션)
 # ---------------------------------------------------------
 class ChatMessage(BaseModel):

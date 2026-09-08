@@ -6,14 +6,14 @@ from typing import List
 
 from models.schemas import WatchRecordCreate, WatchRecordUpdate, WatchRecordOut, SummaryOut
 from services.firebase_service import get_firestore_client, DATA_COLLECTION
-from services.summary_service import build_summary
+from services.summary_service import build_summary, fetch_all_records
 
 router = APIRouter(prefix="/api/data", tags=["data"])
 
 
 @router.post("", response_model=WatchRecordOut, status_code=201)
 def create_record(record: WatchRecordCreate):
-    """새 시청 기록 추가"""
+    """새 시청 기록 추가 (수동 추가는 batch_id 없이 저장되어 항상 화면에 보임)"""
     db = get_firestore_client()
     payload = record.model_dump()
     payload["date"] = str(payload["date"])  # date -> str 직렬화
@@ -24,24 +24,23 @@ def create_record(record: WatchRecordCreate):
 
 @router.get("", response_model=List[WatchRecordOut])
 def list_records():
-    """전체 시청 기록 목록 조회 (날짜순 정렬)"""
-    db = get_firestore_client()
-    docs = db.collection(DATA_COLLECTION).stream()
-    records = []
-    for doc in docs:
-        d = doc.to_dict()
-        records.append(
-            WatchRecordOut(
-                id=doc.id,
-                date=d.get("date", ""),
-                value=d.get("value", 0),
-                memo=d.get("memo", ""),
-                platform=d.get("platform", "unknown"),
-                content_type=d.get("content_type", "long_form"),
-            )
+    """
+    시청 기록 목록 조회 (날짜순 정렬).
+    가져오기 배치로 업로드된 데이터는 현재 활성 배치의 것만,
+    수동 추가 데이터는 항상 포함한다.
+    """
+    records = fetch_all_records()
+    return [
+        WatchRecordOut(
+            id=r["id"],
+            date=r.get("date", ""),
+            value=r.get("value", 0),
+            memo=r.get("memo", ""),
+            platform=r.get("platform", "unknown"),
+            content_type=r.get("content_type", "long_form"),
         )
-    records.sort(key=lambda r: r.date)
-    return records
+        for r in records
+    ]
 
 
 @router.get("/summary", response_model=SummaryOut)

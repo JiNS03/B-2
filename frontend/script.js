@@ -21,7 +21,26 @@ const PLATFORM_LABELS = {
   coupang_play: "쿠팡플레이",
 };
 
-// 차트에 쓸 고정 색상 팔레트 (디자인 톤에 맞춤: 골드 / 틸 / 보조색들)
+// 플랫폼별로 의미 있는 콘텐츠 형태만 남기기 위한 매핑.
+// 값이 하나뿐이면 그 값으로 자동 고정하고 선택 UI는 숨긴다.
+const PLATFORM_CONTENT_TYPES = {
+  youtube: ["long_form", "short_form"],
+  youtube_shorts: ["short_form"],
+  instagram_reels: ["short_form"],
+  tiktok: ["short_form"],
+  youtube_music: ["long_form"], // "재생"만 있으므로 롱폼으로 고정 취급
+  netflix: ["long_form"],
+  disney_plus: ["long_form"],
+  watcha: ["long_form"],
+  coupang_play: ["long_form"],
+};
+
+const CONTENT_TYPE_LABELS = {
+  long_form: "롱폼 (OTT/일반영상)",
+  short_form: "숏폼 (쇼츠/릴스)",
+};
+
+// 차트에 쓸 고정 색상 팔레트
 const CHART_COLORS = ["#E8B34C", "#3E8E8A", "#C1584A", "#7D8CE0", "#9098A3", "#5AB584"];
 
 function platformLabel(code) {
@@ -32,14 +51,39 @@ function platformLabel(code) {
 // 초기화
 // ---------------------------------------------------------
 document.addEventListener("DOMContentLoaded", () => {
+  setupTheme();
   setupTabs();
+  setupContentTypeSync();
+  setupImportForm();
+
   loadSummary();
   loadDataList();
   loadHistoryList();
+  loadBatchList();
 
   document.getElementById("chat-form").addEventListener("submit", handleChatSubmit);
   document.getElementById("data-form").addEventListener("submit", handleDataSubmit);
 });
+
+// ---------------------------------------------------------
+// 다크/라이트 테마 토글
+// ---------------------------------------------------------
+function setupTheme() {
+  const saved = localStorage.getItem("watchlog-theme");
+  const initial = saved || "dark";
+  document.documentElement.setAttribute("data-theme", initial);
+
+  document.getElementById("theme-toggle").addEventListener("click", () => {
+    const current = document.documentElement.getAttribute("data-theme");
+    const next = current === "dark" ? "light" : "dark";
+    document.documentElement.setAttribute("data-theme", next);
+    localStorage.setItem("watchlog-theme", next);
+
+    // Chart.js는 색상을 그릴 때 고정값을 쓰므로, 테마가 바뀌면 다시 그려줘야 축/범례 글자색이 맞음
+    loadSummary();
+    if (allDataRecords.length) renderInsightsFromRecords(allDataRecords);
+  });
+}
 
 // ---------------------------------------------------------
 // 탭 전환
@@ -59,6 +103,34 @@ function setupTabs() {
       document.getElementById(`tab-${btn.dataset.tab}`).classList.add("active");
     });
   });
+}
+
+// ---------------------------------------------------------
+// 데이터 관리 폼: 플랫폼에 따라 콘텐츠 형태 옵션을 다시 그림
+// ---------------------------------------------------------
+function setupContentTypeSync() {
+  const platformSelect = document.getElementById("input-platform");
+  const contentTypeRow = document.getElementById("content-type-row");
+  const contentTypeSelect = document.getElementById("input-content-type");
+
+  function sync() {
+    const platform = platformSelect.value;
+    const allowed = PLATFORM_CONTENT_TYPES[platform] || ["long_form", "short_form"];
+
+    if (allowed.length === 1) {
+      // 선택지가 하나뿐이면 그 값으로 고정하고 필드 자체를 숨김
+      contentTypeSelect.innerHTML = `<option value="${allowed[0]}">${CONTENT_TYPE_LABELS[allowed[0]]}</option>`;
+      contentTypeRow.style.display = "none";
+    } else {
+      contentTypeSelect.innerHTML = allowed
+        .map((v) => `<option value="${v}">${CONTENT_TYPE_LABELS[v]}</option>`)
+        .join("");
+      contentTypeRow.style.display = "";
+    }
+  }
+
+  platformSelect.addEventListener("change", sync);
+  sync(); // 초기 상태 반영
 }
 
 // ---------------------------------------------------------
@@ -83,6 +155,14 @@ async function loadSummary() {
   }
 }
 
+function chartTextColor() {
+  return getComputedStyle(document.documentElement).getPropertyValue("--text-muted").trim() || "#9098A3";
+}
+
+function chartGridColor() {
+  return getComputedStyle(document.documentElement).getPropertyValue("--border").trim() || "#2E333D";
+}
+
 function renderPlatformChart(breakdown) {
   const canvas = document.getElementById("platform-chart");
   const entries = Object.entries(breakdown);
@@ -101,7 +181,7 @@ function renderPlatformChart(breakdown) {
     },
     options: {
       plugins: {
-        legend: { position: "bottom", labels: { color: "#9098A3", font: { family: "Inter" }, boxWidth: 12, padding: 12 } },
+        legend: { position: "bottom", labels: { color: chartTextColor(), font: { family: "Inter" }, boxWidth: 12, padding: 12 } },
       },
     },
   });
@@ -125,7 +205,7 @@ function renderFormtypeChart(metrics) {
     },
     options: {
       plugins: {
-        legend: { position: "bottom", labels: { color: "#9098A3", font: { family: "Inter" }, boxWidth: 12, padding: 12 } },
+        legend: { position: "bottom", labels: { color: chartTextColor(), font: { family: "Inter" }, boxWidth: 12, padding: 12 } },
       },
     },
   });
@@ -133,10 +213,8 @@ function renderFormtypeChart(metrics) {
 
 // ---------------------------------------------------------
 // 인사이트: 캘린더 히트맵 + 추이 라인차트
-// (allDataRecords가 로드된 뒤 호출됨 — loadDataList 참고)
 // ---------------------------------------------------------
 function renderInsightsFromRecords(records) {
-  // 날짜별 총 시청 시간(분) 집계
   const dailyTotals = {};
   records.forEach((r) => {
     dailyTotals[r.date] = (dailyTotals[r.date] || 0) + r.value;
@@ -160,7 +238,6 @@ function renderHeatmap(dailyTotals) {
   const startDate = new Date(dates[0]);
   const endDate = new Date(dates[dates.length - 1]);
 
-  // 시작을 그 주의 일요일로 맞춰서 7행(요일) 그리드가 깔끔하게 나오도록 함
   const gridStart = new Date(startDate);
   gridStart.setDate(gridStart.getDate() - gridStart.getDay());
 
@@ -208,8 +285,8 @@ function renderTrendChart(dailyTotals) {
     options: {
       plugins: { legend: { display: false } },
       scales: {
-        x: { ticks: { color: "#9098A3", maxTicksLimit: 8 }, grid: { color: "#2E333D" } },
-        y: { ticks: { color: "#9098A3" }, grid: { color: "#2E333D" } },
+        x: { ticks: { color: chartTextColor(), maxTicksLimit: 8 }, grid: { color: chartGridColor() } },
+        y: { ticks: { color: chartTextColor() }, grid: { color: chartGridColor() } },
       },
     },
   });
@@ -244,7 +321,7 @@ async function handleChatSubmit(e) {
     currentConversationId = data.conversation_id;
     appendChatMessage("assistant", data.reply);
 
-    loadHistoryList(); // 새 대화가 생겼을 수 있으니 목록 갱신
+    loadHistoryList();
   } catch (err) {
     console.error(err);
     appendChatMessage(
@@ -299,6 +376,7 @@ async function handleDataSubmit(e) {
     if (!res.ok) throw new Error("data create failed");
 
     e.target.reset();
+    document.getElementById("input-platform").dispatchEvent(new Event("change"));
     loadDataList();
     loadSummary();
   } catch (err) {
@@ -360,7 +438,6 @@ function renderDataTable() {
     return;
   }
 
-  // 최근 날짜가 위로 오도록 정렬해서 표시
   const sorted = [...filtered].sort((a, b) => (a.date < b.date ? 1 : -1));
 
   tbody.innerHTML = sorted
@@ -402,6 +479,177 @@ function escapeHtml(str) {
 }
 
 // ---------------------------------------------------------
+// 가져오기: Takeout HTML 업로드
+// ---------------------------------------------------------
+let selectedImportFile = null;
+
+function setupImportForm() {
+  const dropzone = document.getElementById("dropzone");
+  const fileInput = document.getElementById("import-file-input");
+  const dropzoneText = document.getElementById("dropzone-text");
+
+  fileInput.addEventListener("change", () => {
+    if (fileInput.files[0]) setSelectedFile(fileInput.files[0]);
+  });
+
+  dropzone.addEventListener("dragover", (e) => {
+    e.preventDefault();
+    dropzone.classList.add("dragover");
+  });
+  dropzone.addEventListener("dragleave", () => dropzone.classList.remove("dragover"));
+  dropzone.addEventListener("drop", (e) => {
+    e.preventDefault();
+    dropzone.classList.remove("dragover");
+    const file = e.dataTransfer.files[0];
+    if (file) setSelectedFile(file);
+  });
+
+  function setSelectedFile(file) {
+    selectedImportFile = file;
+    dropzoneText.textContent = `선택됨: ${file.name} (${(file.size / 1024 / 1024).toFixed(1)}MB)`;
+  }
+
+  document.getElementById("import-form").addEventListener("submit", handleImportSubmit);
+}
+
+async function handleImportSubmit(e) {
+  e.preventDefault();
+
+  if (!selectedImportFile) {
+    alert("먼저 HTML 파일을 선택해주세요.");
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append("file", selectedImportFile);
+  formData.append("filter_start_date", document.getElementById("import-start-date").value || "");
+  formData.append("avg_long_minutes", document.getElementById("import-avg-long").value || "3");
+  formData.append("avg_short_minutes", document.getElementById("import-avg-short").value || "1");
+  formData.append("avg_music_minutes", document.getElementById("import-avg-music").value || "4");
+
+  const submitBtn = document.getElementById("import-submit-btn");
+  const loading = document.getElementById("import-loading");
+  const loadingText = document.getElementById("import-loading-text");
+  const resultBox = document.getElementById("import-result");
+
+  submitBtn.disabled = true;
+  loading.hidden = false;
+  resultBox.hidden = true;
+
+  // 큰 파일일수록 대략적인 안내 문구를 바꿔줌 (실제 진행률은 아니고 심리적 안내용)
+  const sizeMB = selectedImportFile.size / 1024 / 1024;
+  loadingText.textContent =
+    sizeMB > 10
+      ? "파일이 커서 시간이 조금 더 걸려요 (최대 2분). 창을 닫지 말고 기다려주세요..."
+      : "파일을 분석하고 있어요. 잠시만 기다려주세요...";
+
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/imports/youtube-html`, {
+      method: "POST",
+      body: formData,
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.detail || "업로드에 실패했어요.");
+    }
+
+    resultBox.className = "import-result";
+    resultBox.innerHTML = `
+      <strong>${data.filename}</strong> 분석 완료<br>
+      총 ${data.parsed_count}개 시청 기록 파싱 (게시물 확인 등 ${data.skipped_non_watch}건 제외)<br>
+      기간: ${data.period}<br>
+      ${data.saved_row_count}개 행으로 집계되어 저장됐어요. 이 배치가 자동으로 화면에 적용됩니다.
+    `;
+    resultBox.hidden = false;
+
+    // 새로 만든 배치가 활성화된 상태이므로 화면 전체를 새로고침
+    loadSummary();
+    loadDataList();
+    loadBatchList();
+  } catch (err) {
+    console.error(err);
+    resultBox.className = "import-result error";
+    resultBox.textContent = `업로드 실패: ${err.message}`;
+    resultBox.hidden = false;
+  } finally {
+    submitBtn.disabled = false;
+    loading.hidden = true;
+  }
+}
+
+// ---------------------------------------------------------
+// 가져오기 기록 (배치 목록/전환/삭제)
+// ---------------------------------------------------------
+async function loadBatchList() {
+  const list = document.getElementById("batch-list");
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/imports`);
+    if (!res.ok) throw new Error("batch list fetch failed");
+    const batches = await res.json();
+
+    if (batches.length === 0) {
+      list.innerHTML = `<li class="empty-row">아직 업로드한 기록이 없어요.</li>`;
+      return;
+    }
+
+    list.innerHTML = batches
+      .map(
+        (b) => `
+      <li class="batch-item${b.is_active ? " active" : ""}" data-id="${b.id}">
+        <div class="batch-info">
+          <div class="batch-filename">${escapeHtml(b.filename)}${b.is_active ? '<span class="batch-active-badge">적용됨</span>' : ""}</div>
+          <div class="batch-meta">${formatDate(b.uploaded_at)} · ${b.record_count}행 · ${escapeHtml(b.period)}</div>
+        </div>
+        <div class="batch-actions">
+          <button class="btn-secondary btn-activate" data-id="${b.id}" ${b.is_active ? "disabled" : ""}>이 데이터 보기</button>
+          <button class="btn-delete btn-delete-batch" data-id="${b.id}">삭제</button>
+        </div>
+      </li>`
+      )
+      .join("");
+
+    list.querySelectorAll(".btn-activate").forEach((btn) => {
+      btn.addEventListener("click", () => activateBatch(btn.dataset.id));
+    });
+    list.querySelectorAll(".btn-delete-batch").forEach((btn) => {
+      btn.addEventListener("click", () => deleteBatch(btn.dataset.id));
+    });
+  } catch (err) {
+    console.error(err);
+    list.innerHTML = `<li class="empty-row">가져오기 기록을 불러오지 못했어요.</li>`;
+  }
+}
+
+async function activateBatch(batchId) {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/imports/${batchId}/activate`, { method: "POST" });
+    if (!res.ok) throw new Error("activate failed");
+    loadBatchList();
+    loadSummary();
+    loadDataList();
+  } catch (err) {
+    console.error(err);
+    alert("데이터 전환에 실패했어요.");
+  }
+}
+
+async function deleteBatch(batchId) {
+  if (!confirm("이 배치와 관련 시청 기록을 전부 삭제할까요? 되돌릴 수 없어요.")) return;
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/imports/${batchId}`, { method: "DELETE" });
+    if (!res.ok) throw new Error("delete failed");
+    loadBatchList();
+    loadSummary();
+    loadDataList();
+  } catch (err) {
+    console.error(err);
+    alert("삭제에 실패했어요.");
+  }
+}
+
+// ---------------------------------------------------------
 // 대화 기록 (불러오기)
 // ---------------------------------------------------------
 async function loadHistoryList() {
@@ -431,7 +679,7 @@ async function loadHistoryList() {
 
     list.querySelectorAll(".history-item").forEach((item) => {
       item.addEventListener("click", (e) => {
-        if (e.target.classList.contains("history-delete")) return; // 삭제 버튼 클릭 시 로드 방지
+        if (e.target.classList.contains("history-delete")) return;
         loadConversation(item.dataset.id);
       });
     });
@@ -458,7 +706,6 @@ async function loadConversation(id) {
     resetChatWindow();
     conv.messages.forEach((m) => appendChatMessage(m.role, m.content));
 
-    // 채팅 탭으로 전환
     document.querySelector('.tab-btn[data-tab="chat"]').click();
   } catch (err) {
     console.error(err);
