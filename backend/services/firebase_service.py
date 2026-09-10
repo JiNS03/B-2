@@ -14,7 +14,11 @@ from firebase_admin import credentials, firestore
 
 @lru_cache()
 def get_firestore_client():
-    """Firestore 클라이언트를 1회만 초기화해서 재사용한다."""
+    """
+    Firestore 클라이언트를 1회만 초기화해서 재사용한다.
+    동시에 여러 요청이 들어와 initialize_app()이 두 번 불릴 수 있는
+    경쟁 상태(race condition)에 대비해, 이미 초기화된 경우의 예외는 무시한다.
+    """
     if not firebase_admin._apps:
         service_account_json = os.environ.get("FIREBASE_SERVICE_ACCOUNT_JSON")
         if not service_account_json:
@@ -24,7 +28,11 @@ def get_firestore_client():
             )
         cred_dict = json.loads(service_account_json)
         cred = credentials.Certificate(cred_dict)
-        firebase_admin.initialize_app(cred)
+        try:
+            firebase_admin.initialize_app(cred)
+        except ValueError:
+            # 다른 요청이 그 사이에 먼저 초기화를 마친 경우 -> 정상 상황이므로 무시
+            pass
 
     return firestore.client()
 

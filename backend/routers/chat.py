@@ -2,8 +2,8 @@
 AI 챗봇 라우터
 동작 흐름:
   1) 데이터 요약 조회 (summary_service.build_summary)
-  2) 요약을 시스템 프롬프트에 삽입 (openai_service.build_system_prompt)
-  3) GPT API 호출 (openai_service.ask_gpt)
+  2) 요약을 시스템 프롬프트에 삽입 (gemini_service.build_system_prompt)
+  3) Gemini API 호출 (gemini_service.ask_gpt)
   4) 대화 내용을 conversations에 자동 저장
 """
 from datetime import datetime, timezone
@@ -11,7 +11,7 @@ from fastapi import APIRouter, HTTPException
 
 from models.schemas import ChatRequest, ChatResponse, SummaryOut
 from services.summary_service import build_summary
-from services.openai_service import ask_gpt
+from services.gemini_service import ask_gpt
 from services.firebase_service import get_firestore_client, CONVERSATIONS_COLLECTION
 
 router = APIRouter(prefix="/api/chat", tags=["chat"])

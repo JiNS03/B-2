@@ -1,29 +1,23 @@
 """
-OpenAI 호환 Chat Completions 호출
+Google Gemini(제미나이) API 호출
 - 데이터 요약을 시스템 프롬프트에 주입하는 컨텍스트 주입 로직의 핵심
-- OpenAI 공식 API 또는 Codyssey 공개 API(OpenAI 호환 규격) 둘 다 지원한다.
-  Codyssey 키를 쓰는 경우 OPENAI_BASE_URL 환경변수에 콘솔의 "문서" 탭에
-  적힌 Base URL을 넣어야 한다. (안 넣으면 기본값인 OpenAI 공식 서버로 요청감)
+- API 키는 Google AI Studio(aistudio.google.com/apikey)에서 무료로 발급받을 수 있다.
 """
 import os
-from openai import OpenAI
+from google import genai
+from google.genai import types
 from typing import Dict, Any, List
 
 _client = None
 
 
-def _get_client() -> OpenAI:
+def _get_client() -> genai.Client:
     global _client
     if _client is None:
-        api_key = os.environ.get("OPENAI_API_KEY")
+        api_key = os.environ.get("GEMINI_API_KEY")
         if not api_key:
-            raise RuntimeError("OPENAI_API_KEY 환경변수가 설정되지 않았습니다.")
-
-        base_url = os.environ.get("OPENAI_BASE_URL")  # Codyssey 등 호환 API를 쓸 때만 설정
-        if base_url:
-            _client = OpenAI(api_key=api_key, base_url=base_url)
-        else:
-            _client = OpenAI(api_key=api_key)
+            raise RuntimeError("GEMINI_API_KEY 환경변수가 설정되지 않았습니다.")
+        _client = genai.Client(api_key=api_key)
     return _client
 
 
@@ -89,21 +83,30 @@ def build_system_prompt(summary: Dict[str, Any]) -> str:
 
 def ask_gpt(user_message: str, summary: Dict[str, Any], history: List[Dict[str, str]] = None) -> str:
     """
-    시스템 프롬프트(데이터 요약 주입) + 대화 히스토리 + 새 질문을 GPT에 전달하고 답변을 받는다.
+    시스템 프롬프트(데이터 요약 주입) + 대화 히스토리 + 새 질문을 Gemini에 전달하고 답변을 받는다.
     history: [{"role": "user"/"assistant", "content": "..."}]
+
+    함수 이름은 기존 코드(routers/chat.py)와의 호환을 위해 ask_gpt로 유지했다.
     """
     client = _get_client()
     system_prompt = build_system_prompt(summary)
+    model_name = os.environ.get("GEMINI_MODEL", "gemini-2.0-flash")
 
-    messages = [{"role": "system", "content": system_prompt}]
+    # Gemini는 role을 "user"/"model"로 구분한다 (OpenAI의 "assistant"에 해당하는 게 "model")
+    contents = []
     if history:
-        messages.extend(history)
-    messages.append({"role": "user", "content": user_message})
+        for h in history:
+            role = "model" if h["role"] == "assistant" else "user"
+            contents.append(types.Content(role=role, parts=[types.Part(text=h["content"])]))
+    contents.append(types.Content(role="user", parts=[types.Part(text=user_message)]))
 
-    response = client.chat.completions.create(
-        model=os.environ.get("OPENAI_MODEL", "gpt-4o-mini"),
-        messages=messages,
-        max_tokens=500,
-        temperature=0.7,
+    response = client.models.generate_content(
+        model=model_name,
+        contents=contents,
+        config=types.GenerateContentConfig(
+            system_instruction=system_prompt,
+            max_output_tokens=500,
+            temperature=0.7,
+        ),
     )
-    return response.choices[0].message.content
+    return response.text
