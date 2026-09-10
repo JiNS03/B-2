@@ -113,10 +113,10 @@ def ask_gpt(user_message: str, summary: Dict[str, Any], history: List[Dict[str, 
 
     if _looks_like_analysis_question(user_message):
         length_instruction = "이번 질문은 데이터 분석/통계 질문으로 보입니다. 필요한 만큼 구체적인 숫자를 들어 설명하되, 8문장을 넘기지 마세요."
-        max_tokens = 1200
+        max_tokens = 2000
     else:
         length_instruction = "이번 질문은 간단한 인사말이나 잡담으로 보입니다. 데이터를 억지로 언급하지 말고 1~2문장으로 짧고 자연스럽게 답하세요."
-        max_tokens = 200
+        max_tokens = 400
 
     system_prompt = f"{base_system_prompt}\n\n{length_instruction}"
 
@@ -135,11 +135,11 @@ def ask_gpt(user_message: str, summary: Dict[str, Any], history: List[Dict[str, 
             system_instruction=system_prompt,
             max_output_tokens=max_tokens,
             temperature=0.7,
-            # gemini-3.6-flash처럼 '생각(thinking)' 기능이 있는 모델은 답변 생성 전
-            # 내부 추론에도 max_output_tokens를 함께 소모한다. 추론 토큰이 한도를 다
-            # 써버리면 정작 눈에 보이는 답변이 끝나기 전에 잘리므로, 이 챗봇처럼
-            # 복잡한 추론이 필요 없는 용도에서는 thinking을 꺼서 토큰을 답변에만 쓰게 한다.
-            thinking_config=types.ThinkingConfig(thinking_budget=0),
         ),
     )
+
+    if not response.text:
+        # 토큰 한도 초과, 안전 필터 등으로 텍스트가 비어 응답이 오는 경우에 대한 안전장치
+        raise RuntimeError("AI로부터 빈 응답을 받았습니다. 잠시 후 다시 시도해주세요.")
+
     return response.text
