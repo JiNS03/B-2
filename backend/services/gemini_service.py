@@ -40,8 +40,19 @@ SYSTEM_PROMPT_TEMPLATE = """당신은 사용자의 미디어 시청 습관(OTT, 
 데이터에 없는 내용은 추측하지 말고 모른다고 답하세요.
 
 [답변 형식 주의사항]
-- 화면이 마크다운을 지원하지 않으므로 **굵게**, # 제목, - 목록 같은 마크다운 문법을 쓰지 말고 평범한 문장으로만 답하세요.
-- 답변은 5~6문장 이내로 간결하게 작성하세요."""
+- 화면이 마크다운을 지원하지 않으므로 **굵게**, # 제목, - 목록 같은 마크다운 문법을 쓰지 말고 평범한 문장으로만 답하세요."""
+
+# 이 키워드들이 포함되면 "데이터 분석 질문"으로 판단해서 더 길게(더 많은 토큰으로) 답하게 한다.
+# 그 외(인사말, 잡담 등)는 짧게 답하도록 해서 토큰 제한에 걸려 답변이 끊기는 일을 방지한다.
+ANALYSIS_KEYWORDS = [
+    "분석", "시청", "데이터", "통계", "트렌드", "추이", "평균", "비교", "패턴", "습관",
+    "얼마나", "숏폼", "롱폼", "유튜브", "넷플릭스", "플랫폼", "기간", "요약", "비중", "추세",
+    "많이", "적게", "얼마", "몇 분", "몇분", "몇 시간", "몇시간",
+]
+
+
+def _looks_like_analysis_question(message: str) -> bool:
+    return any(kw in message for kw in ANALYSIS_KEYWORDS)
 
 
 def _format_platform_summary(platform_breakdown: Dict[str, Any]) -> str:
@@ -91,10 +102,23 @@ def ask_gpt(user_message: str, summary: Dict[str, Any], history: List[Dict[str, 
     history: [{"role": "user"/"assistant", "content": "..."}]
 
     함수 이름은 기존 코드(routers/chat.py)와의 호환을 위해 ask_gpt로 유지했다.
+
+    메시지가 데이터 분석/통계 질문처럼 보이면 답변을 충분히 길게(토큰 여유 크게) 허용하고,
+    인사말이나 짧은 잡담이면 토큰 여유를 작게 줘서 애초에 답이 길어지지 않게 한다.
+    이렇게 하면 짧은 대화가 max_output_tokens에 걸려 중간에 끊기는 일이 없어진다.
     """
     client = _get_client()
-    system_prompt = build_system_prompt(summary)
+    base_system_prompt = build_system_prompt(summary)
     model_name = os.environ.get("GEMINI_MODEL", "gemini-3.6-flash")
+
+    if _looks_like_analysis_question(user_message):
+        length_instruction = "이번 질문은 데이터 분석/통계 질문으로 보입니다. 필요한 만큼 구체적인 숫자를 들어 설명하되, 8문장을 넘기지 마세요."
+        max_tokens = 1200
+    else:
+        length_instruction = "이번 질문은 간단한 인사말이나 잡담으로 보입니다. 데이터를 억지로 언급하지 말고 1~2문장으로 짧고 자연스럽게 답하세요."
+        max_tokens = 200
+
+    system_prompt = f"{base_system_prompt}\n\n{length_instruction}"
 
     # Gemini는 role을 "user"/"model"로 구분한다 (OpenAI의 "assistant"에 해당하는 게 "model")
     contents = []
@@ -109,7 +133,7 @@ def ask_gpt(user_message: str, summary: Dict[str, Any], history: List[Dict[str, 
         contents=contents,
         config=types.GenerateContentConfig(
             system_instruction=system_prompt,
-            max_output_tokens=1000,
+            max_output_tokens=max_tokens,
             temperature=0.7,
         ),
     )
