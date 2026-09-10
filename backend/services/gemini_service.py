@@ -135,6 +135,11 @@ def ask_gpt(user_message: str, summary: Dict[str, Any], history: List[Dict[str, 
             system_instruction=system_prompt,
             max_output_tokens=max_tokens,
             temperature=0.7,
+            # gemini-3.6-flash처럼 '생각(thinking)' 기능이 있는 모델은 답변 생성 전
+            # 내부 추론에도 max_output_tokens를 함께 소모한다. 추론 토큰이 한도를 다
+            # 써버리면 정작 눈에 보이는 답변이 끝나기 전에 잘리므로, 이 챗봇처럼
+            # 복잡한 추론이 필요 없는 용도에서는 thinking을 꺼서 토큰을 답변에만 쓰게 한다.
+            thinking_config=types.ThinkingConfig(thinking_budget=0),
         ),
     )
     return response.text
