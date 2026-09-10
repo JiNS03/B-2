@@ -90,7 +90,7 @@ def ask_gpt(user_message: str, summary: Dict[str, Any], history: List[Dict[str, 
     """
     client = _get_client()
     system_prompt = build_system_prompt(summary)
-    model_name = os.environ.get("GEMINI_MODEL", "gemini-2.0-flash")
+    model_name = os.environ.get("GEMINI_MODEL", "gemini-3.6-flash")
 
     # Gemini는 role을 "user"/"model"로 구분한다 (OpenAI의 "assistant"에 해당하는 게 "model")
     contents = []
