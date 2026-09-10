@@ -1,6 +1,6 @@
 # WATCH LOG 프로젝트 개발 보고서
 
--b-2-pi.vercel.app
+ **배포 링크**: [(https://b-2-pi.vercel.app/)](https://b-2-pi.vercel.app/)
 
 **내 시청 습관을 아는 AI 비서** — 시계열 데이터 분석 + 컨텍스트 주입 AI 챗봇 서비스
 
