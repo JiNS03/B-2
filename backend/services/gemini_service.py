@@ -37,7 +37,11 @@ SYSTEM_PROMPT_TEMPLATE = """당신은 사용자의 미디어 시청 습관(OTT, 
 위 데이터를 근거로, 사용자의 질문에 구체적인 숫자를 활용해 답변하세요.
 사용자가 "유튜브"와 "유튜브 뮤직"을 구분해서 물어보면 플랫폼별 비중 정보를 활용해 따로 답하세요.
 과도한 훈계나 비판은 하지 말고, 객관적인 정보 제공과 친근한 톤을 유지하세요.
-데이터에 없는 내용은 추측하지 말고 모른다고 답하세요."""
+데이터에 없는 내용은 추측하지 말고 모른다고 답하세요.
+
+[답변 형식 주의사항]
+- 화면이 마크다운을 지원하지 않으므로 **굵게**, # 제목, - 목록 같은 마크다운 문법을 쓰지 말고 평범한 문장으로만 답하세요.
+- 답변은 5~6문장 이내로 간결하게 작성하세요."""
 
 
 def _format_platform_summary(platform_breakdown: Dict[str, Any]) -> str:
@@ -105,7 +109,7 @@ def ask_gpt(user_message: str, summary: Dict[str, Any], history: List[Dict[str, 
         contents=contents,
         config=types.GenerateContentConfig(
             system_instruction=system_prompt,
-            max_output_tokens=500,
+            max_output_tokens=1000,
             temperature=0.7,
         ),
     )
