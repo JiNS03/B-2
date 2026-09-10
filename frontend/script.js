@@ -638,10 +638,21 @@ async function handleImportSubmit(e) {
       : "파일을 분석하고 있어요. 잠시만 기다려주세요...";
 
   try {
-    const res = await fetch(`${API_BASE_URL}/api/imports/youtube-html`, {
-      method: "POST",
-      body: formData,
-    });
+    // 서버가 죽거나 응답이 지나치게 지연될 경우 무한 로딩에 빠지지 않도록
+    // 4분(대용량 파일도 감안한 넉넉한 시간) 후 자동으로 요청을 취소한다.
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 4 * 60 * 1000);
+
+    let res;
+    try {
+      res = await fetch(`${API_BASE_URL}/api/imports/youtube-html`, {
+        method: "POST",
+        body: formData,
+        signal: controller.signal,
+      });
+    } finally {
+      clearTimeout(timeoutId);
+    }
 
     const data = await res.json();
 
@@ -664,7 +675,10 @@ async function handleImportSubmit(e) {
   } catch (err) {
     console.error(err);
     resultBox.className = "import-result error";
-    resultBox.textContent = `업로드 실패: ${err.message}`;
+    resultBox.textContent =
+      err.name === "AbortError"
+        ? "업로드가 4분 넘게 끝나지 않아 자동으로 중단했어요. 서버가 무료 티어라 큰 파일 처리 중 타임아웃됐을 수 있어요. 파일을 더 작게 나눠보거나 잠시 후 다시 시도해주세요."
+        : `업로드 실패: ${err.message}`;
     resultBox.hidden = false;
   } finally {
     submitBtn.disabled = false;

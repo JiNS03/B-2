@@ -66,7 +66,13 @@ def parse_takeout_html(
     rows: [{date, value, memo, platform, content_type}, ...] — Firestore에 그대로 저장 가능한 형태
     stats: {parsed_count, skipped_non_watch, failed_dates, period}
     """
-    soup = BeautifulSoup(html_text, "html.parser")
+    # lxml은 html.parser보다 훨씬 빠르다. 대용량 Takeout 파일(수십 MB)을
+    # 무료 티어 서버에서 처리할 때 시간 초과를 피하기 위해 lxml을 우선 사용하고,
+    # 혹시 lxml이 설치 안 된 환경이면 표준 파서로 대체한다.
+    try:
+        soup = BeautifulSoup(html_text, "lxml")
+    except Exception:
+        soup = BeautifulSoup(html_text, "html.parser")
     entries = soup.find_all("div", class_="outer-cell")
 
     records = []
